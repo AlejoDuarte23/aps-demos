@@ -2,6 +2,8 @@
 
 This project demonstrates a simple integration between Autodesk Platform Services (APS) and the VIKTOR platform. It showcases how to use the APS Viewer, Object Storage Service (OSS), authentication, and Model Derivative API within a VIKTOR app.
 
+![SampleAPP](assets/app.png)
+
 ## Authentication (AUTH)
 
 The app uses APS 2-legged authentication to securely access Autodesk APIs. You will need to provide your APS `CLIENT_ID` and `CLIENT_SECRET` as environment variables. The authentication flow is illustrated below:
