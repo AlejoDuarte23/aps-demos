@@ -1,0 +1,253 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1124pt" height="315pt" viewBox="0.00 0.00 1124.10 314.60">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 310.6)">
+<title>ModelDerivative_API_Tree</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-310.6 1120.1,-310.6 1120.1,4 -4,4"/>
+<!-- MD_Service -->
+<g id="node1" class="node">
+<title>MD_Service</title>
+<ellipse fill="mediumpurple" stroke="black" cx="99.84" cy="-197.3" rx="99.84" ry="29.42"/>
+<text text-anchor="middle" x="99.84" y="-201.5" font-family="Times,serif" font-size="14.00">Model Derivative API</text>
+<text text-anchor="middle" x="99.84" y="-184.7" font-family="Times,serif" font-size="14.00">/modelderivative/v2</text>
+</g>
+<!-- MD_DesignData -->
+<g id="node2" class="node">
+<title>MD_DesignData</title>
+<path fill="none" stroke="black" d="M299.55,-215.3C299.55,-215.3 247.68,-215.3 247.68,-215.3 241.68,-215.3 235.68,-209.3 235.68,-203.3 235.68,-203.3 235.68,-191.3 235.68,-191.3 235.68,-185.3 241.68,-179.3 247.68,-179.3 247.68,-179.3 299.55,-179.3 299.55,-179.3 305.55,-179.3 311.55,-185.3 311.55,-191.3 311.55,-191.3 311.55,-203.3 311.55,-203.3 311.55,-209.3 305.55,-215.3 299.55,-215.3"/>
+<text text-anchor="middle" x="273.61" y="-193.1" font-family="Times,serif" font-size="14.00">designdata</text>
+</g>
+<!-- MD_Service&#45;&gt;MD_DesignData -->
+<g id="edge1" class="edge">
+<title>MD_Service-&gt;MD_DesignData</title>
+<path fill="none" stroke="black" d="M199.76,-197.3C208.18,-197.3 216.43,-197.3 224.17,-197.3"/>
+<polygon fill="black" stroke="black" points="223.98,-200.8 233.98,-197.3 223.98,-193.8 223.98,-200.8"/>
+</g>
+<!-- MD_DesignData_Formats -->
+<g id="node3" class="node">
+<title>MD_DesignData_Formats</title>
+<path fill="none" stroke="black" d="M359.55,-237.5C359.55,-237.5 428.92,-237.5 428.92,-237.5 434.92,-237.5 440.92,-243.5 440.92,-249.5 440.92,-249.5 440.92,-267.1 440.92,-267.1 440.92,-273.1 434.92,-279.1 428.92,-279.1 428.92,-279.1 359.55,-279.1 359.55,-279.1 353.55,-279.1 347.55,-273.1 347.55,-267.1 347.55,-267.1 347.55,-249.5 347.55,-249.5 347.55,-243.5 353.55,-237.5 359.55,-237.5"/>
+<text text-anchor="middle" x="394.23" y="-262.5" font-family="Times,serif" font-size="14.00">GET /formats</text>
+<text text-anchor="middle" x="394.23" y="-245.7" font-family="Times,serif" font-size="14.00">(get-formats)</text>
+</g>
+<!-- MD_DesignData&#45;&gt;MD_DesignData_Formats -->
+<g id="edge2" class="edge">
+<title>MD_DesignData-&gt;MD_DesignData_Formats</title>
+<path fill="none" stroke="black" d="M310.52,-215.77C320.45,-220.87 331.41,-226.51 342.02,-231.96"/>
+<polygon fill="black" stroke="black" points="340.2,-234.96 350.69,-236.42 343.4,-228.74 340.2,-234.96"/>
+</g>
+<!-- MD_DesignData_Job -->
+<g id="node4" class="node">
+<title>MD_DesignData_Job</title>
+<path fill="none" stroke="black" d="M368.47,-176.5C368.47,-176.5 419.99,-176.5 419.99,-176.5 425.99,-176.5 431.99,-182.5 431.99,-188.5 431.99,-188.5 431.99,-206.1 431.99,-206.1 431.99,-212.1 425.99,-218.1 419.99,-218.1 419.99,-218.1 368.47,-218.1 368.47,-218.1 362.47,-218.1 356.47,-212.1 356.47,-206.1 356.47,-206.1 356.47,-188.5 356.47,-188.5 356.47,-182.5 362.47,-176.5 368.47,-176.5"/>
+<text text-anchor="middle" x="394.23" y="-201.5" font-family="Times,serif" font-size="14.00">POST /job</text>
+<text text-anchor="middle" x="394.23" y="-184.7" font-family="Times,serif" font-size="14.00">(start-job)</text>
+</g>
+<!-- MD_DesignData&#45;&gt;MD_DesignData_Job -->
+<g id="edge3" class="edge">
+<title>MD_DesignData-&gt;MD_DesignData_Job</title>
+<path fill="none" stroke="black" d="M311.82,-197.3C322.31,-197.3 333.87,-197.3 344.91,-197.3"/>
+<polygon fill="black" stroke="black" points="344.64,-200.8 354.64,-197.3 344.64,-193.8 344.64,-200.8"/>
+</g>
+<!-- MD_DesignData_Urn -->
+<g id="node5" class="node">
+<title>MD_DesignData_Urn</title>
+<path fill="none" stroke="black" d="M409.23,-158.3C409.23,-158.3 379.23,-158.3 379.23,-158.3 373.23,-158.3 367.23,-152.3 367.23,-146.3 367.23,-146.3 367.23,-134.3 367.23,-134.3 367.23,-128.3 373.23,-122.3 379.23,-122.3 379.23,-122.3 409.23,-122.3 409.23,-122.3 415.23,-122.3 421.23,-128.3 421.23,-134.3 421.23,-134.3 421.23,-146.3 421.23,-146.3 421.23,-152.3 415.23,-158.3 409.23,-158.3"/>
+<text text-anchor="middle" x="394.23" y="-136.1" font-family="Times,serif" font-size="14.00">{urn}</text>
+</g>
+<!-- MD_DesignData&#45;&gt;MD_DesignData_Urn -->
+<g id="edge4" class="edge">
+<title>MD_DesignData-&gt;MD_DesignData_Urn</title>
+<path fill="none" stroke="black" d="M311.82,-179.42C326.25,-172.49 342.72,-164.57 357.06,-157.68"/>
+<polygon fill="black" stroke="black" points="358.2,-161.02 365.69,-153.53 355.16,-154.71 358.2,-161.02"/>
+</g>
+<!-- MD_DesignData_Urn_Metadata -->
+<g id="node6" class="node">
+<title>MD_DesignData_Urn_Metadata</title>
+<path fill="none" stroke="black" d="M562.14,-246.3C562.14,-246.3 519.61,-246.3 519.61,-246.3 513.61,-246.3 507.61,-240.3 507.61,-234.3 507.61,-234.3 507.61,-222.3 507.61,-222.3 507.61,-216.3 513.61,-210.3 519.61,-210.3 519.61,-210.3 562.14,-210.3 562.14,-210.3 568.14,-210.3 574.14,-216.3 574.14,-222.3 574.14,-222.3 574.14,-234.3 574.14,-234.3 574.14,-240.3 568.14,-246.3 562.14,-246.3"/>
+<text text-anchor="middle" x="540.87" y="-224.1" font-family="Times,serif" font-size="14.00">metadata</text>
+</g>
+<!-- MD_DesignData_Urn&#45;&gt;MD_DesignData_Urn_Metadata -->
+<g id="edge5" class="edge">
+<title>MD_DesignData_Urn-&gt;MD_DesignData_Urn_Metadata</title>
+<path fill="none" stroke="black" d="M421.4,-154.59C427.93,-158.48 434.81,-162.85 440.92,-167.3 458.21,-179.92 459,-187.58 476.92,-199.3 483.21,-203.42 490.18,-207.25 497.13,-210.69"/>
+<polygon fill="black" stroke="black" points="495.29,-213.7 505.83,-214.8 498.28,-207.37 495.29,-213.7"/>
+</g>
+<!-- MD_DesignData_Urn_Thumbnail -->
+<g id="node13" class="node">
+<title>MD_DesignData_Urn_Thumbnail</title>
+<path fill="none" stroke="black" d="M499.19,-148.5C499.19,-148.5 582.56,-148.5 582.56,-148.5 588.56,-148.5 594.56,-154.5 594.56,-160.5 594.56,-160.5 594.56,-178.1 594.56,-178.1 594.56,-184.1 588.56,-190.1 582.56,-190.1 582.56,-190.1 499.19,-190.1 499.19,-190.1 493.19,-190.1 487.19,-184.1 487.19,-178.1 487.19,-178.1 487.19,-160.5 487.19,-160.5 487.19,-154.5 493.19,-148.5 499.19,-148.5"/>
+<text text-anchor="middle" x="540.87" y="-173.5" font-family="Times,serif" font-size="14.00">GET /thumbnail</text>
+<text text-anchor="middle" x="540.87" y="-156.7" font-family="Times,serif" font-size="14.00">(get-thumbnail)</text>
+</g>
+<!-- MD_DesignData_Urn&#45;&gt;MD_DesignData_Urn_Thumbnail -->
+<g id="edge12" class="edge">
+<title>MD_DesignData_Urn-&gt;MD_DesignData_Urn_Thumbnail</title>
+<path fill="none" stroke="black" d="M421.43,-145.55C436.67,-148.61 456.61,-152.61 475.76,-156.45"/>
+<polygon fill="black" stroke="black" points="474.94,-159.85 485.43,-158.38 476.31,-152.99 474.94,-159.85"/>
+</g>
+<!-- MD_DesignData_Urn_Manifest -->
+<g id="node14" class="node">
+<title>MD_DesignData_Urn_Manifest</title>
+<path fill="none" stroke="black" d="M560.98,-130.3C560.98,-130.3 520.77,-130.3 520.77,-130.3 514.77,-130.3 508.77,-124.3 508.77,-118.3 508.77,-118.3 508.77,-106.3 508.77,-106.3 508.77,-100.3 514.77,-94.3 520.77,-94.3 520.77,-94.3 560.98,-94.3 560.98,-94.3 566.98,-94.3 572.98,-100.3 572.98,-106.3 572.98,-106.3 572.98,-118.3 572.98,-118.3 572.98,-124.3 566.98,-130.3 560.98,-130.3"/>
+<text text-anchor="middle" x="540.87" y="-108.1" font-family="Times,serif" font-size="14.00">manifest</text>
+</g>
+<!-- MD_DesignData_Urn&#45;&gt;MD_DesignData_Urn_Manifest -->
+<g id="edge13" class="edge">
+<title>MD_DesignData_Urn-&gt;MD_DesignData_Urn_Manifest</title>
+<path fill="none" stroke="black" d="M421.43,-135.23C442.51,-131.15 472.57,-125.33 497.13,-120.57"/>
+<polygon fill="black" stroke="black" points="497.69,-124.03 506.84,-118.69 496.36,-117.16 497.69,-124.03"/>
+</g>
+<!-- MD_DesignData_Urn_References -->
+<g id="node20" class="node">
+<title>MD_DesignData_Urn_References</title>
+<path fill="none" stroke="black" d="M488.92,-34.5C488.92,-34.5 592.83,-34.5 592.83,-34.5 598.83,-34.5 604.83,-40.5 604.83,-46.5 604.83,-46.5 604.83,-64.1 604.83,-64.1 604.83,-70.1 598.83,-76.1 592.83,-76.1 592.83,-76.1 488.92,-76.1 488.92,-76.1 482.92,-76.1 476.92,-70.1 476.92,-64.1 476.92,-64.1 476.92,-46.5 476.92,-46.5 476.92,-40.5 482.92,-34.5 488.92,-34.5"/>
+<text text-anchor="middle" x="540.87" y="-59.5" font-family="Times,serif" font-size="14.00">POST /references</text>
+<text text-anchor="middle" x="540.87" y="-42.7" font-family="Times,serif" font-size="14.00">(specify-references)</text>
+</g>
+<!-- MD_DesignData_Urn&#45;&gt;MD_DesignData_Urn_References -->
+<g id="edge19" class="edge">
+<title>MD_DesignData_Urn-&gt;MD_DesignData_Urn_References</title>
+<path fill="none" stroke="black" d="M420.36,-121.96C436.21,-110.76 457.32,-96.49 476.92,-85.3 478.97,-84.13 481.08,-82.96 483.22,-81.8"/>
+<polygon fill="black" stroke="black" points="484.81,-84.92 492.05,-77.19 481.57,-78.71 484.81,-84.92"/>
+</g>
+<!-- MD_DesignData_Urn_Metadata_Get -->
+<g id="node7" class="node">
+<title>MD_DesignData_Urn_Metadata_Get</title>
+<path fill="none" stroke="black" d="M652.83,-264.5C652.83,-264.5 748.24,-264.5 748.24,-264.5 754.24,-264.5 760.24,-270.5 760.24,-276.5 760.24,-276.5 760.24,-294.1 760.24,-294.1 760.24,-300.1 754.24,-306.1 748.24,-306.1 748.24,-306.1 652.83,-306.1 652.83,-306.1 646.83,-306.1 640.83,-300.1 640.83,-294.1 640.83,-294.1 640.83,-276.5 640.83,-276.5 640.83,-270.5 646.83,-264.5 652.83,-264.5"/>
+<text text-anchor="middle" x="700.54" y="-289.5" font-family="Times,serif" font-size="14.00">GET /</text>
+<text text-anchor="middle" x="700.54" y="-272.7" font-family="Times,serif" font-size="14.00">(get-model-views)</text>
+</g>
+<!-- MD_DesignData_Urn_Metadata&#45;&gt;MD_DesignData_Urn_Metadata_Get -->
+<g id="edge6" class="edge">
+<title>MD_DesignData_Urn_Metadata-&gt;MD_DesignData_Urn_Metadata_Get</title>
+<path fill="none" stroke="black" d="M574.54,-240.11C590.68,-245.94 610.79,-253.22 630.14,-260.21"/>
+<polygon fill="black" stroke="black" points="628.76,-263.43 639.36,-263.54 631.14,-256.85 628.76,-263.43"/>
+</g>
+<!-- MD_DesignData_Urn_Metadata_ModelGuid -->
+<g id="node8" class="node">
+<title>MD_DesignData_Urn_Metadata_ModelGuid</title>
+<path fill="none" stroke="black" d="M734.75,-246.3C734.75,-246.3 666.32,-246.3 666.32,-246.3 660.32,-246.3 654.32,-240.3 654.32,-234.3 654.32,-234.3 654.32,-222.3 654.32,-222.3 654.32,-216.3 660.32,-210.3 666.32,-210.3 666.32,-210.3 734.75,-210.3 734.75,-210.3 740.75,-210.3 746.75,-216.3 746.75,-222.3 746.75,-222.3 746.75,-234.3 746.75,-234.3 746.75,-240.3 740.75,-246.3 734.75,-246.3"/>
+<text text-anchor="middle" x="700.54" y="-224.1" font-family="Times,serif" font-size="14.00">{modelGuid}</text>
+</g>
+<!-- MD_DesignData_Urn_Metadata&#45;&gt;MD_DesignData_Urn_Metadata_ModelGuid -->
+<g id="edge7" class="edge">
+<title>MD_DesignData_Urn_Metadata-&gt;MD_DesignData_Urn_Metadata_ModelGuid</title>
+<path fill="none" stroke="black" d="M574.54,-228.3C594.22,-228.3 619.82,-228.3 642.72,-228.3"/>
+<polygon fill="black" stroke="black" points="642.55,-231.8 652.55,-228.3 642.55,-224.8 642.55,-231.8"/>
+</g>
+<!-- MD_DesignData_Urn_Metadata_ModelGuid_GetTree -->
+<g id="node9" class="node">
+<title>MD_DesignData_Urn_Metadata_ModelGuid_GetTree</title>
+<path fill="none" stroke="black" d="M835.84,-264.5C835.84,-264.5 918.78,-264.5 918.78,-264.5 924.78,-264.5 930.78,-270.5 930.78,-276.5 930.78,-276.5 930.78,-294.1 930.78,-294.1 930.78,-300.1 924.78,-306.1 918.78,-306.1 918.78,-306.1 835.84,-306.1 835.84,-306.1 829.84,-306.1 823.84,-300.1 823.84,-294.1 823.84,-294.1 823.84,-276.5 823.84,-276.5 823.84,-270.5 829.84,-264.5 835.84,-264.5"/>
+<text text-anchor="middle" x="877.31" y="-289.5" font-family="Times,serif" font-size="14.00">GET /</text>
+<text text-anchor="middle" x="877.31" y="-272.7" font-family="Times,serif" font-size="14.00">(get-object-tree)</text>
+</g>
+<!-- MD_DesignData_Urn_Metadata_ModelGuid&#45;&gt;MD_DesignData_Urn_Metadata_ModelGuid_GetTree -->
+<g id="edge8" class="edge">
+<title>MD_DesignData_Urn_Metadata_ModelGuid-&gt;MD_DesignData_Urn_Metadata_ModelGuid_GetTree</title>
+<path fill="none" stroke="black" d="M747,-243.13C767.07,-249.67 791.02,-257.48 812.81,-264.59"/>
+<polygon fill="black" stroke="black" points="811.61,-267.88 822.2,-267.65 813.78,-261.23 811.61,-267.88"/>
+</g>
+<!-- MD_DesignData_Urn_Metadata_ModelGuid_Props -->
+<g id="node10" class="node">
+<title>MD_DesignData_Urn_Metadata_ModelGuid_Props</title>
+<path fill="none" stroke="black" d="M901.3,-246.3C901.3,-246.3 853.32,-246.3 853.32,-246.3 847.32,-246.3 841.32,-240.3 841.32,-234.3 841.32,-234.3 841.32,-222.3 841.32,-222.3 841.32,-216.3 847.32,-210.3 853.32,-210.3 853.32,-210.3 901.3,-210.3 901.3,-210.3 907.3,-210.3 913.3,-216.3 913.3,-222.3 913.3,-222.3 913.3,-234.3 913.3,-234.3 913.3,-240.3 907.3,-246.3 901.3,-246.3"/>
+<text text-anchor="middle" x="877.31" y="-224.1" font-family="Times,serif" font-size="14.00">properties</text>
+</g>
+<!-- MD_DesignData_Urn_Metadata_ModelGuid&#45;&gt;MD_DesignData_Urn_Metadata_ModelGuid_Props -->
+<g id="edge9" class="edge">
+<title>MD_DesignData_Urn_Metadata_ModelGuid-&gt;MD_DesignData_Urn_Metadata_ModelGuid_Props</title>
+<path fill="none" stroke="black" d="M747,-228.3C772.44,-228.3 804.08,-228.3 829.7,-228.3"/>
+<polygon fill="black" stroke="black" points="829.49,-231.8 839.49,-228.3 829.49,-224.8 829.49,-231.8"/>
+</g>
+<!-- MD_DesignData_Urn_Metadata_ModelGuid_Props_Query -->
+<g id="node12" class="node">
+<title>MD_DesignData_Urn_Metadata_ModelGuid_Props_Query</title>
+<path fill="none" stroke="black" d="M808.24,-150.5C808.24,-150.5 946.38,-150.5 946.38,-150.5 952.38,-150.5 958.38,-156.5 958.38,-162.5 958.38,-162.5 958.38,-180.1 958.38,-180.1 958.38,-186.1 952.38,-192.1 946.38,-192.1 946.38,-192.1 808.24,-192.1 808.24,-192.1 802.24,-192.1 796.24,-186.1 796.24,-180.1 796.24,-180.1 796.24,-162.5 796.24,-162.5 796.24,-156.5 802.24,-150.5 808.24,-150.5"/>
+<text text-anchor="middle" x="877.31" y="-175.5" font-family="Times,serif" font-size="14.00">POST /properties:query</text>
+<text text-anchor="middle" x="877.31" y="-158.7" font-family="Times,serif" font-size="14.00">(fetch-specific-properties)</text>
+</g>
+<!-- MD_DesignData_Urn_Metadata_ModelGuid&#45;&gt;MD_DesignData_Urn_Metadata_ModelGuid_Props_Query -->
+<g id="edge11" class="edge">
+<title>MD_DesignData_Urn_Metadata_ModelGuid-&gt;MD_DesignData_Urn_Metadata_ModelGuid_Props_Query</title>
+<path fill="none" stroke="black" d="M747,-213.47C763.24,-208.18 782.02,-202.05 800.14,-196.14"/>
+<polygon fill="black" stroke="black" points="801.14,-199.5 809.56,-193.07 798.97,-192.84 801.14,-199.5"/>
+</g>
+<!-- MD_DesignData_Urn_Metadata_ModelGuid_Props_GetAll -->
+<g id="node11" class="node">
+<title>MD_DesignData_Urn_Metadata_ModelGuid_Props_GetAll</title>
+<path fill="none" stroke="black" d="M1006.38,-207.5C1006.38,-207.5 1104.1,-207.5 1104.1,-207.5 1110.1,-207.5 1116.1,-213.5 1116.1,-219.5 1116.1,-219.5 1116.1,-237.1 1116.1,-237.1 1116.1,-243.1 1110.1,-249.1 1104.1,-249.1 1104.1,-249.1 1006.38,-249.1 1006.38,-249.1 1000.38,-249.1 994.38,-243.1 994.38,-237.1 994.38,-237.1 994.38,-219.5 994.38,-219.5 994.38,-213.5 1000.38,-207.5 1006.38,-207.5"/>
+<text text-anchor="middle" x="1055.24" y="-232.5" font-family="Times,serif" font-size="14.00">GET /</text>
+<text text-anchor="middle" x="1055.24" y="-215.7" font-family="Times,serif" font-size="14.00">(get-all-properties)</text>
+</g>
+<!-- MD_DesignData_Urn_Metadata_ModelGuid_Props&#45;&gt;MD_DesignData_Urn_Metadata_ModelGuid_Props_GetAll -->
+<g id="edge10" class="edge">
+<title>MD_DesignData_Urn_Metadata_ModelGuid_Props-&gt;MD_DesignData_Urn_Metadata_ModelGuid_Props_GetAll</title>
+<path fill="none" stroke="black" d="M913.49,-228.3C933.4,-228.3 959.04,-228.3 982.96,-228.3"/>
+<polygon fill="black" stroke="black" points="982.66,-231.8 992.66,-228.3 982.66,-224.8 982.66,-231.8"/>
+</g>
+<!-- MD_DesignData_Urn_Manifest_Get -->
+<g id="node15" class="node">
+<title>MD_DesignData_Urn_Manifest_Get</title>
+<path fill="none" stroke="black" d="M664.89,-150.5C664.89,-150.5 736.19,-150.5 736.19,-150.5 742.19,-150.5 748.19,-156.5 748.19,-162.5 748.19,-162.5 748.19,-180.1 748.19,-180.1 748.19,-186.1 742.19,-192.1 736.19,-192.1 736.19,-192.1 664.89,-192.1 664.89,-192.1 658.89,-192.1 652.89,-186.1 652.89,-180.1 652.89,-180.1 652.89,-162.5 652.89,-162.5 652.89,-156.5 658.89,-150.5 664.89,-150.5"/>
+<text text-anchor="middle" x="700.54" y="-175.5" font-family="Times,serif" font-size="14.00">GET /</text>
+<text text-anchor="middle" x="700.54" y="-158.7" font-family="Times,serif" font-size="14.00">(get-manifest)</text>
+</g>
+<!-- MD_DesignData_Urn_Manifest&#45;&gt;MD_DesignData_Urn_Manifest_Get -->
+<g id="edge14" class="edge">
+<title>MD_DesignData_Urn_Manifest-&gt;MD_DesignData_Urn_Manifest_Get</title>
+<path fill="none" stroke="black" d="M573.4,-124.1C592.95,-131.41 618.66,-141.03 641.76,-149.68"/>
+<polygon fill="black" stroke="black" points="640.5,-152.94 651.09,-153.17 642.95,-146.39 640.5,-152.94"/>
+</g>
+<!-- MD_DesignData_Urn_Manifest_Delete -->
+<g id="node16" class="node">
+<title>MD_DesignData_Urn_Manifest_Delete</title>
+<path fill="none" stroke="black" d="M656.73,-89.5C656.73,-89.5 744.34,-89.5 744.34,-89.5 750.34,-89.5 756.34,-95.5 756.34,-101.5 756.34,-101.5 756.34,-119.1 756.34,-119.1 756.34,-125.1 750.34,-131.1 744.34,-131.1 744.34,-131.1 656.73,-131.1 656.73,-131.1 650.73,-131.1 644.73,-125.1 644.73,-119.1 644.73,-119.1 644.73,-101.5 644.73,-101.5 644.73,-95.5 650.73,-89.5 656.73,-89.5"/>
+<text text-anchor="middle" x="700.54" y="-114.5" font-family="Times,serif" font-size="14.00">DELETE /</text>
+<text text-anchor="middle" x="700.54" y="-97.7" font-family="Times,serif" font-size="14.00">(delete-manifest)</text>
+</g>
+<!-- MD_DesignData_Urn_Manifest&#45;&gt;MD_DesignData_Urn_Manifest_Delete -->
+<g id="edge15" class="edge">
+<title>MD_DesignData_Urn_Manifest-&gt;MD_DesignData_Urn_Manifest_Delete</title>
+<path fill="none" stroke="black" d="M573.4,-111.9C590.54,-111.68 612.41,-111.41 633.1,-111.14"/>
+<polygon fill="black" stroke="black" points="632.98,-114.64 642.93,-111.02 632.89,-107.65 632.98,-114.64"/>
+</g>
+<!-- MD_DesignData_Urn_Manifest_DerivativeUrn -->
+<g id="node17" class="node">
+<title>MD_DesignData_Urn_Manifest_DerivativeUrn</title>
+<path fill="none" stroke="black" d="M742.13,-71.3C742.13,-71.3 658.95,-71.3 658.95,-71.3 652.95,-71.3 646.95,-65.3 646.95,-59.3 646.95,-59.3 646.95,-47.3 646.95,-47.3 646.95,-41.3 652.95,-35.3 658.95,-35.3 658.95,-35.3 742.13,-35.3 742.13,-35.3 748.13,-35.3 754.13,-41.3 754.13,-47.3 754.13,-47.3 754.13,-59.3 754.13,-59.3 754.13,-65.3 748.13,-71.3 742.13,-71.3"/>
+<text text-anchor="middle" x="700.54" y="-49.1" font-family="Times,serif" font-size="14.00">{derivativeUrn}</text>
+</g>
+<!-- MD_DesignData_Urn_Manifest&#45;&gt;MD_DesignData_Urn_Manifest_DerivativeUrn -->
+<g id="edge16" class="edge">
+<title>MD_DesignData_Urn_Manifest-&gt;MD_DesignData_Urn_Manifest_DerivativeUrn</title>
+<path fill="none" stroke="black" d="M573.4,-100.5C592.41,-93.39 617.24,-84.1 639.83,-75.64"/>
+<polygon fill="black" stroke="black" points="640.81,-79.01 648.95,-72.23 638.36,-72.46 640.81,-79.01"/>
+</g>
+<!-- MD_DesignData_Urn_Manifest_DerivativeUrn_SignedCookies -->
+<g id="node18" class="node">
+<title>MD_DesignData_Urn_Manifest_DerivativeUrn_SignedCookies</title>
+<path fill="none" stroke="black" d="M824.35,-61.5C824.35,-61.5 930.27,-61.5 930.27,-61.5 936.27,-61.5 942.27,-67.5 942.27,-73.5 942.27,-73.5 942.27,-91.1 942.27,-91.1 942.27,-97.1 936.27,-103.1 930.27,-103.1 930.27,-103.1 824.35,-103.1 824.35,-103.1 818.35,-103.1 812.35,-97.1 812.35,-91.1 812.35,-91.1 812.35,-73.5 812.35,-73.5 812.35,-67.5 818.35,-61.5 824.35,-61.5"/>
+<text text-anchor="middle" x="877.31" y="-86.5" font-family="Times,serif" font-size="14.00">GET /signedcookies</text>
+<text text-anchor="middle" x="877.31" y="-69.7" font-family="Times,serif" font-size="14.00">(get-derivative-url)</text>
+</g>
+<!-- MD_DesignData_Urn_Manifest_DerivativeUrn&#45;&gt;MD_DesignData_Urn_Manifest_DerivativeUrn_SignedCookies -->
+<g id="edge17" class="edge">
+<title>MD_DesignData_Urn_Manifest_DerivativeUrn-&gt;MD_DesignData_Urn_Manifest_DerivativeUrn_SignedCookies</title>
+<path fill="none" stroke="black" d="M754.45,-62.08C769,-64.49 785.07,-67.16 800.64,-69.74"/>
+<polygon fill="black" stroke="black" points="799.92,-73.17 810.36,-71.36 801.07,-66.27 799.92,-73.17"/>
+</g>
+<!-- MD_DesignData_Urn_Manifest_DerivativeUrn_Head -->
+<g id="node19" class="node">
+<title>MD_DesignData_Urn_Manifest_DerivativeUrn_Head</title>
+<path fill="none" stroke="black" d="M814.47,-0.5C814.47,-0.5 940.16,-0.5 940.16,-0.5 946.16,-0.5 952.16,-6.5 952.16,-12.5 952.16,-12.5 952.16,-30.1 952.16,-30.1 952.16,-36.1 946.16,-42.1 940.16,-42.1 940.16,-42.1 814.47,-42.1 814.47,-42.1 808.47,-42.1 802.47,-36.1 802.47,-30.1 802.47,-30.1 802.47,-12.5 802.47,-12.5 802.47,-6.5 808.47,-0.5 814.47,-0.5"/>
+<text text-anchor="middle" x="877.31" y="-25.5" font-family="Times,serif" font-size="14.00">HEAD /</text>
+<text text-anchor="middle" x="877.31" y="-8.7" font-family="Times,serif" font-size="14.00">(head-check-derivative)</text>
+</g>
+<!-- MD_DesignData_Urn_Manifest_DerivativeUrn&#45;&gt;MD_DesignData_Urn_Manifest_DerivativeUrn_Head -->
+<g id="edge18" class="edge">
+<title>MD_DesignData_Urn_Manifest_DerivativeUrn-&gt;MD_DesignData_Urn_Manifest_DerivativeUrn_Head</title>
+<path fill="none" stroke="black" d="M754.45,-43.61C765.91,-41.51 778.31,-39.24 790.67,-36.98"/>
+<polygon fill="black" stroke="black" points="791.28,-40.43 800.49,-35.18 790.02,-33.54 791.28,-40.43"/>
+</g>
+</g>
+</svg>

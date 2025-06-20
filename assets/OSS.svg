@@ -1,0 +1,319 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1297pt" height="524pt" viewBox="0.00 0.00 1296.77 523.60">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 519.6)">
+<title>OSS_API_Tree</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-519.6 1292.77,-519.6 1292.77,4 -4,4"/>
+<!-- OSS_Service -->
+<g id="node1" class="node">
+<title>OSS_Service</title>
+<ellipse fill="sandybrown" stroke="black" cx="47.9" cy="-317.3" rx="47.9" ry="29.42"/>
+<text text-anchor="middle" x="47.9" y="-321.5" font-family="Times,serif" font-size="14.00">OSS API</text>
+<text text-anchor="middle" x="47.9" y="-304.7" font-family="Times,serif" font-size="14.00">/oss/v2</text>
+</g>
+<!-- OSS_Buckets -->
+<g id="node2" class="node">
+<title>OSS_Buckets</title>
+<path fill="none" stroke="black" d="M223.39,-422.3C223.39,-422.3 188.62,-422.3 188.62,-422.3 182.62,-422.3 176.62,-416.3 176.62,-410.3 176.62,-410.3 176.62,-398.3 176.62,-398.3 176.62,-392.3 182.62,-386.3 188.62,-386.3 188.62,-386.3 223.39,-386.3 223.39,-386.3 229.39,-386.3 235.39,-392.3 235.39,-398.3 235.39,-398.3 235.39,-410.3 235.39,-410.3 235.39,-416.3 229.39,-422.3 223.39,-422.3"/>
+<text text-anchor="middle" x="206" y="-400.1" font-family="Times,serif" font-size="14.00">buckets</text>
+</g>
+<!-- OSS_Service&#45;&gt;OSS_Buckets -->
+<g id="edge1" class="edge">
+<title>OSS_Service-&gt;OSS_Buckets</title>
+<path fill="none" stroke="black" d="M83.93,-336.82C108.42,-350.47 141.14,-368.7 166.38,-382.78"/>
+<polygon fill="black" stroke="black" points="164.59,-385.78 175.03,-387.59 168,-379.67 164.59,-385.78"/>
+</g>
+<!-- OSS_SignedResources -->
+<g id="node21" class="node">
+<title>OSS_SignedResources</title>
+<path fill="none" stroke="black" d="M268.21,-276.3C268.21,-276.3 143.8,-276.3 143.8,-276.3 137.8,-276.3 131.8,-270.3 131.8,-264.3 131.8,-264.3 131.8,-252.3 131.8,-252.3 131.8,-246.3 137.8,-240.3 143.8,-240.3 143.8,-240.3 268.21,-240.3 268.21,-240.3 274.21,-240.3 280.21,-246.3 280.21,-252.3 280.21,-252.3 280.21,-264.3 280.21,-264.3 280.21,-270.3 274.21,-276.3 268.21,-276.3"/>
+<text text-anchor="middle" x="206" y="-254.1" font-family="Times,serif" font-size="14.00">signedresources/{hash}</text>
+</g>
+<!-- OSS_Service&#45;&gt;OSS_SignedResources -->
+<g id="edge20" class="edge">
+<title>OSS_Service-&gt;OSS_SignedResources</title>
+<path fill="none" stroke="black" d="M89.1,-302.11C106.32,-295.6 126.79,-287.86 145.7,-280.72"/>
+<polygon fill="black" stroke="black" points="146.78,-284.05 154.89,-277.24 144.3,-277.5 146.78,-284.05"/>
+</g>
+<!-- OSS_Buckets_GetList -->
+<g id="node3" class="node">
+<title>OSS_Buckets_GetList</title>
+<path fill="none" stroke="black" d="M386.14,-473.5C386.14,-473.5 454.33,-473.5 454.33,-473.5 460.33,-473.5 466.33,-479.5 466.33,-485.5 466.33,-485.5 466.33,-503.1 466.33,-503.1 466.33,-509.1 460.33,-515.1 454.33,-515.1 454.33,-515.1 386.14,-515.1 386.14,-515.1 380.14,-515.1 374.14,-509.1 374.14,-503.1 374.14,-503.1 374.14,-485.5 374.14,-485.5 374.14,-479.5 380.14,-473.5 386.14,-473.5"/>
+<text text-anchor="middle" x="420.23" y="-498.5" font-family="Times,serif" font-size="14.00">GET /</text>
+<text text-anchor="middle" x="420.23" y="-481.7" font-family="Times,serif" font-size="14.00">(get_buckets)</text>
+</g>
+<!-- OSS_Buckets&#45;&gt;OSS_Buckets_GetList -->
+<g id="edge2" class="edge">
+<title>OSS_Buckets-&gt;OSS_Buckets_GetList</title>
+<path fill="none" stroke="black" d="M235.87,-421.99C257.44,-434.69 287.95,-451.56 316.21,-463.3 330.99,-469.44 347.42,-474.95 362.74,-479.55"/>
+<polygon fill="black" stroke="black" points="361.62,-482.87 372.2,-482.32 363.59,-476.15 361.62,-482.87"/>
+</g>
+<!-- OSS_Buckets_Post -->
+<g id="node4" class="node">
+<title>OSS_Buckets_Post</title>
+<path fill="none" stroke="black" d="M380.71,-412.5C380.71,-412.5 459.76,-412.5 459.76,-412.5 465.76,-412.5 471.76,-418.5 471.76,-424.5 471.76,-424.5 471.76,-442.1 471.76,-442.1 471.76,-448.1 465.76,-454.1 459.76,-454.1 459.76,-454.1 380.71,-454.1 380.71,-454.1 374.71,-454.1 368.71,-448.1 368.71,-442.1 368.71,-442.1 368.71,-424.5 368.71,-424.5 368.71,-418.5 374.71,-412.5 380.71,-412.5"/>
+<text text-anchor="middle" x="420.23" y="-437.5" font-family="Times,serif" font-size="14.00">POST /</text>
+<text text-anchor="middle" x="420.23" y="-420.7" font-family="Times,serif" font-size="14.00">(create_bucket)</text>
+</g>
+<!-- OSS_Buckets&#45;&gt;OSS_Buckets_Post -->
+<g id="edge3" class="edge">
+<title>OSS_Buckets-&gt;OSS_Buckets_Post</title>
+<path fill="none" stroke="black" d="M235.63,-408.21C266.59,-412.44 316.9,-419.32 357.03,-424.8"/>
+<polygon fill="black" stroke="black" points="356.44,-428.25 366.82,-426.14 357.39,-421.32 356.44,-428.25"/>
+</g>
+<!-- OSS_Buckets_BucketKey -->
+<g id="node5" class="node">
+<title>OSS_Buckets_BucketKey</title>
+<path fill="none" stroke="black" d="M453.27,-394.3C453.27,-394.3 387.19,-394.3 387.19,-394.3 381.19,-394.3 375.19,-388.3 375.19,-382.3 375.19,-382.3 375.19,-370.3 375.19,-370.3 375.19,-364.3 381.19,-358.3 387.19,-358.3 387.19,-358.3 453.27,-358.3 453.27,-358.3 459.27,-358.3 465.27,-364.3 465.27,-370.3 465.27,-370.3 465.27,-382.3 465.27,-382.3 465.27,-388.3 459.27,-394.3 453.27,-394.3"/>
+<text text-anchor="middle" x="420.23" y="-372.1" font-family="Times,serif" font-size="14.00">{bucketKey}</text>
+</g>
+<!-- OSS_Buckets&#45;&gt;OSS_Buckets_BucketKey -->
+<g id="edge4" class="edge">
+<title>OSS_Buckets-&gt;OSS_Buckets_BucketKey</title>
+<path fill="none" stroke="black" d="M235.63,-400.52C268.31,-396.21 322.55,-389.06 363.62,-383.64"/>
+<polygon fill="black" stroke="black" points="363.88,-387.13 373.33,-382.36 362.96,-380.19 363.88,-387.13"/>
+</g>
+<!-- OSS_Buckets_BucketKey_Delete -->
+<g id="node6" class="node">
+<title>OSS_Buckets_BucketKey_Delete</title>
+<path fill="none" stroke="black" d="M585.88,-416.5C585.88,-416.5 664.94,-416.5 664.94,-416.5 670.94,-416.5 676.94,-422.5 676.94,-428.5 676.94,-428.5 676.94,-446.1 676.94,-446.1 676.94,-452.1 670.94,-458.1 664.94,-458.1 664.94,-458.1 585.88,-458.1 585.88,-458.1 579.88,-458.1 573.88,-452.1 573.88,-446.1 573.88,-446.1 573.88,-428.5 573.88,-428.5 573.88,-422.5 579.88,-416.5 585.88,-416.5"/>
+<text text-anchor="middle" x="625.41" y="-441.5" font-family="Times,serif" font-size="14.00">DELETE /</text>
+<text text-anchor="middle" x="625.41" y="-424.7" font-family="Times,serif" font-size="14.00">(delete_bucket)</text>
+</g>
+<!-- OSS_Buckets_BucketKey&#45;&gt;OSS_Buckets_BucketKey_Delete -->
+<g id="edge5" class="edge">
+<title>OSS_Buckets_BucketKey-&gt;OSS_Buckets_BucketKey_Delete</title>
+<path fill="none" stroke="black" d="M465.55,-387.18C483.81,-391.85 505.14,-397.56 524.26,-403.3 536.71,-407.04 549.92,-411.31 562.54,-415.53"/>
+<polygon fill="black" stroke="black" points="561.4,-418.84 571.99,-418.73 563.64,-412.21 561.4,-418.84"/>
+</g>
+<!-- OSS_Buckets_BucketKey_Details -->
+<g id="node7" class="node">
+<title>OSS_Buckets_BucketKey_Details</title>
+<path fill="none" stroke="black" d="M572.26,-355.5C572.26,-355.5 678.55,-355.5 678.55,-355.5 684.55,-355.5 690.55,-361.5 690.55,-367.5 690.55,-367.5 690.55,-385.1 690.55,-385.1 690.55,-391.1 684.55,-397.1 678.55,-397.1 678.55,-397.1 572.26,-397.1 572.26,-397.1 566.26,-397.1 560.26,-391.1 560.26,-385.1 560.26,-385.1 560.26,-367.5 560.26,-367.5 560.26,-361.5 566.26,-355.5 572.26,-355.5"/>
+<text text-anchor="middle" x="625.41" y="-380.5" font-family="Times,serif" font-size="14.00">GET /details</text>
+<text text-anchor="middle" x="625.41" y="-363.7" font-family="Times,serif" font-size="14.00">(get_bucket_details)</text>
+</g>
+<!-- OSS_Buckets_BucketKey&#45;&gt;OSS_Buckets_BucketKey_Details -->
+<g id="edge6" class="edge">
+<title>OSS_Buckets_BucketKey-&gt;OSS_Buckets_BucketKey_Details</title>
+<path fill="none" stroke="black" d="M465.57,-376.3C489.89,-376.3 520.71,-376.3 548.72,-376.3"/>
+<polygon fill="black" stroke="black" points="548.6,-379.8 558.6,-376.3 548.6,-372.8 548.6,-379.8"/>
+</g>
+<!-- OSS_Buckets_BucketKey_Objects -->
+<g id="node8" class="node">
+<title>OSS_Buckets_BucketKey_Objects</title>
+<path fill="none" stroke="black" d="M641.23,-337.3C641.23,-337.3 609.58,-337.3 609.58,-337.3 603.58,-337.3 597.58,-331.3 597.58,-325.3 597.58,-325.3 597.58,-313.3 597.58,-313.3 597.58,-307.3 603.58,-301.3 609.58,-301.3 609.58,-301.3 641.23,-301.3 641.23,-301.3 647.23,-301.3 653.23,-307.3 653.23,-313.3 653.23,-313.3 653.23,-325.3 653.23,-325.3 653.23,-331.3 647.23,-337.3 641.23,-337.3"/>
+<text text-anchor="middle" x="625.41" y="-315.1" font-family="Times,serif" font-size="14.00">objects</text>
+</g>
+<!-- OSS_Buckets_BucketKey&#45;&gt;OSS_Buckets_BucketKey_Objects -->
+<g id="edge7" class="edge">
+<title>OSS_Buckets_BucketKey-&gt;OSS_Buckets_BucketKey_Objects</title>
+<path fill="none" stroke="black" d="M465.7,-365.01C483.89,-360.29 505.12,-354.67 524.26,-349.3 544.91,-343.5 567.83,-336.67 586.52,-330.99"/>
+<polygon fill="black" stroke="black" points="587.29,-334.41 595.83,-328.15 585.24,-327.72 587.29,-334.41"/>
+</g>
+<!-- OSS_Buckets_BucketKey_Objects_GetList -->
+<g id="node9" class="node">
+<title>OSS_Buckets_BucketKey_Objects_GetList</title>
+<path fill="none" stroke="black" d="M790.09,-420.5C790.09,-420.5 855.17,-420.5 855.17,-420.5 861.17,-420.5 867.17,-426.5 867.17,-432.5 867.17,-432.5 867.17,-450.1 867.17,-450.1 867.17,-456.1 861.17,-462.1 855.17,-462.1 855.17,-462.1 790.09,-462.1 790.09,-462.1 784.09,-462.1 778.09,-456.1 778.09,-450.1 778.09,-450.1 778.09,-432.5 778.09,-432.5 778.09,-426.5 784.09,-420.5 790.09,-420.5"/>
+<text text-anchor="middle" x="822.63" y="-445.5" font-family="Times,serif" font-size="14.00">GET /</text>
+<text text-anchor="middle" x="822.63" y="-428.7" font-family="Times,serif" font-size="14.00">(get_objects)</text>
+</g>
+<!-- OSS_Buckets_BucketKey_Objects&#45;&gt;OSS_Buckets_BucketKey_Objects_GetList -->
+<g id="edge8" class="edge">
+<title>OSS_Buckets_BucketKey_Objects-&gt;OSS_Buckets_BucketKey_Objects_GetList</title>
+<path fill="none" stroke="black" d="M653.59,-326.32C665.94,-330.55 680.09,-336.97 690.55,-346.3 714.91,-368.03 701.31,-389.61 726.55,-410.3 738.21,-419.86 752.91,-426.5 767.23,-431.11"/>
+<polygon fill="black" stroke="black" points="766.03,-434.4 776.61,-433.82 767.97,-427.68 766.03,-434.4"/>
+</g>
+<!-- OSS_Buckets_BucketKey_Objects_BatchSignedS3Upload -->
+<g id="node10" class="node">
+<title>OSS_Buckets_BucketKey_Objects_BatchSignedS3Upload</title>
+<path fill="none" stroke="black" d="M747.11,-359.5C747.11,-359.5 898.15,-359.5 898.15,-359.5 904.15,-359.5 910.15,-365.5 910.15,-371.5 910.15,-371.5 910.15,-389.1 910.15,-389.1 910.15,-395.1 904.15,-401.1 898.15,-401.1 898.15,-401.1 747.11,-401.1 747.11,-401.1 741.11,-401.1 735.11,-395.1 735.11,-389.1 735.11,-389.1 735.11,-371.5 735.11,-371.5 735.11,-365.5 741.11,-359.5 747.11,-359.5"/>
+<text text-anchor="middle" x="822.63" y="-384.5" font-family="Times,serif" font-size="14.00">POST /batchsigneds3upload</text>
+<text text-anchor="middle" x="822.63" y="-367.7" font-family="Times,serif" font-size="14.00">(batch_signed_s3_upload)</text>
+</g>
+<!-- OSS_Buckets_BucketKey_Objects&#45;&gt;OSS_Buckets_BucketKey_Objects_BatchSignedS3Upload -->
+<g id="edge9" class="edge">
+<title>OSS_Buckets_BucketKey_Objects-&gt;OSS_Buckets_BucketKey_Objects_BatchSignedS3Upload</title>
+<path fill="none" stroke="black" d="M653.55,-327.78C676.71,-335.02 711.19,-345.79 742.91,-355.7"/>
+<polygon fill="black" stroke="black" points="741.5,-358.93 752.09,-358.57 743.59,-352.25 741.5,-358.93"/>
+</g>
+<!-- OSS_Buckets_BucketKey_Objects_BatchCompleteUpload -->
+<g id="node11" class="node">
+<title>OSS_Buckets_BucketKey_Objects_BatchCompleteUpload</title>
+<path fill="none" stroke="black" d="M745.95,-298.5C745.95,-298.5 899.31,-298.5 899.31,-298.5 905.31,-298.5 911.31,-304.5 911.31,-310.5 911.31,-310.5 911.31,-328.1 911.31,-328.1 911.31,-334.1 905.31,-340.1 899.31,-340.1 899.31,-340.1 745.95,-340.1 745.95,-340.1 739.95,-340.1 733.95,-334.1 733.95,-328.1 733.95,-328.1 733.95,-310.5 733.95,-310.5 733.95,-304.5 739.95,-298.5 745.95,-298.5"/>
+<text text-anchor="middle" x="822.63" y="-323.5" font-family="Times,serif" font-size="14.00">POST /batchcompleteupload</text>
+<text text-anchor="middle" x="822.63" y="-306.7" font-family="Times,serif" font-size="14.00">(batch_complete_upload)</text>
+</g>
+<!-- OSS_Buckets_BucketKey_Objects&#45;&gt;OSS_Buckets_BucketKey_Objects_BatchCompleteUpload -->
+<g id="edge10" class="edge">
+<title>OSS_Buckets_BucketKey_Objects-&gt;OSS_Buckets_BucketKey_Objects_BatchCompleteUpload</title>
+<path fill="none" stroke="black" d="M653.55,-319.3C671.8,-319.3 697.1,-319.3 722.52,-319.3"/>
+<polygon fill="black" stroke="black" points="722.28,-322.8 732.28,-319.3 722.28,-315.8 722.28,-322.8"/>
+</g>
+<!-- OSS_Buckets_BucketKey_Objects_BatchSignedS3Download -->
+<g id="node12" class="node">
+<title>OSS_Buckets_BucketKey_Objects_BatchSignedS3Download</title>
+<path fill="none" stroke="black" d="M738.55,-237.5C738.55,-237.5 906.71,-237.5 906.71,-237.5 912.71,-237.5 918.71,-243.5 918.71,-249.5 918.71,-249.5 918.71,-267.1 918.71,-267.1 918.71,-273.1 912.71,-279.1 906.71,-279.1 906.71,-279.1 738.55,-279.1 738.55,-279.1 732.55,-279.1 726.55,-273.1 726.55,-267.1 726.55,-267.1 726.55,-249.5 726.55,-249.5 726.55,-243.5 732.55,-237.5 738.55,-237.5"/>
+<text text-anchor="middle" x="822.63" y="-262.5" font-family="Times,serif" font-size="14.00">POST /batchsigneds3download</text>
+<text text-anchor="middle" x="822.63" y="-245.7" font-family="Times,serif" font-size="14.00">(batch_signed_s3_download)</text>
+</g>
+<!-- OSS_Buckets_BucketKey_Objects&#45;&gt;OSS_Buckets_BucketKey_Objects_BatchSignedS3Download -->
+<g id="edge11" class="edge">
+<title>OSS_Buckets_BucketKey_Objects-&gt;OSS_Buckets_BucketKey_Objects_BatchSignedS3Download</title>
+<path fill="none" stroke="black" d="M653.55,-310.82C676.71,-303.58 711.19,-292.81 742.91,-282.9"/>
+<polygon fill="black" stroke="black" points="743.59,-286.35 752.09,-280.03 741.5,-279.67 743.59,-286.35"/>
+</g>
+<!-- OSS_Buckets_BucketKey_Objects_ObjectKey -->
+<g id="node13" class="node">
+<title>OSS_Buckets_BucketKey_Objects_ObjectKey</title>
+<path fill="none" stroke="black" d="M854.11,-219.3C854.11,-219.3 791.14,-219.3 791.14,-219.3 785.14,-219.3 779.14,-213.3 779.14,-207.3 779.14,-207.3 779.14,-195.3 779.14,-195.3 779.14,-189.3 785.14,-183.3 791.14,-183.3 791.14,-183.3 854.11,-183.3 854.11,-183.3 860.11,-183.3 866.11,-189.3 866.11,-195.3 866.11,-195.3 866.11,-207.3 866.11,-207.3 866.11,-213.3 860.11,-219.3 854.11,-219.3"/>
+<text text-anchor="middle" x="822.63" y="-197.1" font-family="Times,serif" font-size="14.00">{objectKey}</text>
+</g>
+<!-- OSS_Buckets_BucketKey_Objects&#45;&gt;OSS_Buckets_BucketKey_Objects_ObjectKey -->
+<g id="edge12" class="edge">
+<title>OSS_Buckets_BucketKey_Objects-&gt;OSS_Buckets_BucketKey_Objects_ObjectKey</title>
+<path fill="none" stroke="black" d="M641.87,-300.86C660.09,-280.27 692.26,-247.35 726.55,-228.3 739.22,-221.26 753.87,-215.93 767.82,-211.95"/>
+<polygon fill="black" stroke="black" points="768.58,-215.37 777.34,-209.42 766.78,-208.6 768.58,-215.37"/>
+</g>
+<!-- OSS_Buckets_BucketKey_Objects_ObjectKey_Delete -->
+<g id="node14" class="node">
+<title>OSS_Buckets_BucketKey_Objects_ObjectKey_Delete</title>
+<path fill="none" stroke="black" d="M1083.76,-360.5C1083.76,-360.5 1159.71,-360.5 1159.71,-360.5 1165.71,-360.5 1171.71,-366.5 1171.71,-372.5 1171.71,-372.5 1171.71,-390.1 1171.71,-390.1 1171.71,-396.1 1165.71,-402.1 1159.71,-402.1 1159.71,-402.1 1083.76,-402.1 1083.76,-402.1 1077.76,-402.1 1071.76,-396.1 1071.76,-390.1 1071.76,-390.1 1071.76,-372.5 1071.76,-372.5 1071.76,-366.5 1077.76,-360.5 1083.76,-360.5"/>
+<text text-anchor="middle" x="1121.74" y="-385.5" font-family="Times,serif" font-size="14.00">DELETE /</text>
+<text text-anchor="middle" x="1121.74" y="-368.7" font-family="Times,serif" font-size="14.00">(delete_object)</text>
+</g>
+<!-- OSS_Buckets_BucketKey_Objects_ObjectKey&#45;&gt;OSS_Buckets_BucketKey_Objects_ObjectKey_Delete -->
+<g id="edge13" class="edge">
+<title>OSS_Buckets_BucketKey_Objects_ObjectKey-&gt;OSS_Buckets_BucketKey_Objects_ObjectKey_Delete</title>
+<path fill="none" stroke="black" d="M866.59,-204.39C884.79,-207.8 904.93,-214.66 918.71,-228.3 958.89,-268.07 912.74,-312.42 954.71,-350.3 982.97,-375.81 1025.26,-383.42 1060.09,-384.72"/>
+<polygon fill="black" stroke="black" points="1060.01,-388.22 1070.07,-384.91 1060.14,-381.22 1060.01,-388.22"/>
+</g>
+<!-- OSS_Buckets_BucketKey_Objects_ObjectKey_Details -->
+<g id="node15" class="node">
+<title>OSS_Buckets_BucketKey_Objects_ObjectKey_Details</title>
+<path fill="none" stroke="black" d="M1070.15,-299.5C1070.15,-299.5 1173.33,-299.5 1173.33,-299.5 1179.33,-299.5 1185.33,-305.5 1185.33,-311.5 1185.33,-311.5 1185.33,-329.1 1185.33,-329.1 1185.33,-335.1 1179.33,-341.1 1173.33,-341.1 1173.33,-341.1 1070.15,-341.1 1070.15,-341.1 1064.15,-341.1 1058.15,-335.1 1058.15,-329.1 1058.15,-329.1 1058.15,-311.5 1058.15,-311.5 1058.15,-305.5 1064.15,-299.5 1070.15,-299.5"/>
+<text text-anchor="middle" x="1121.74" y="-324.5" font-family="Times,serif" font-size="14.00">GET /details</text>
+<text text-anchor="middle" x="1121.74" y="-307.7" font-family="Times,serif" font-size="14.00">(get_object_details)</text>
+</g>
+<!-- OSS_Buckets_BucketKey_Objects_ObjectKey&#45;&gt;OSS_Buckets_BucketKey_Objects_ObjectKey_Details -->
+<g id="edge14" class="edge">
+<title>OSS_Buckets_BucketKey_Objects_ObjectKey-&gt;OSS_Buckets_BucketKey_Objects_ObjectKey_Details</title>
+<path fill="none" stroke="black" d="M866.55,-206.38C884.11,-210.16 903.76,-216.77 918.71,-228.3 943.63,-247.53 928.92,-271.24 954.71,-289.3 981.34,-307.96 1016.05,-316.27 1046.84,-319.69"/>
+<polygon fill="black" stroke="black" points="1046.19,-323.15 1056.48,-320.6 1046.85,-316.18 1046.19,-323.15"/>
+</g>
+<!-- OSS_Buckets_BucketKey_Objects_ObjectKey_Signed -->
+<g id="node16" class="node">
+<title>OSS_Buckets_BucketKey_Objects_ObjectKey_Signed</title>
+<path fill="none" stroke="black" d="M1055.39,-238.5C1055.39,-238.5 1188.09,-238.5 1188.09,-238.5 1194.09,-238.5 1200.09,-244.5 1200.09,-250.5 1200.09,-250.5 1200.09,-268.1 1200.09,-268.1 1200.09,-274.1 1194.09,-280.1 1188.09,-280.1 1188.09,-280.1 1055.39,-280.1 1055.39,-280.1 1049.39,-280.1 1043.39,-274.1 1043.39,-268.1 1043.39,-268.1 1043.39,-250.5 1043.39,-250.5 1043.39,-244.5 1049.39,-238.5 1055.39,-238.5"/>
+<text text-anchor="middle" x="1121.74" y="-263.5" font-family="Times,serif" font-size="14.00">POST /signed</text>
+<text text-anchor="middle" x="1121.74" y="-246.7" font-family="Times,serif" font-size="14.00">(create_signed_resource)</text>
+</g>
+<!-- OSS_Buckets_BucketKey_Objects_ObjectKey&#45;&gt;OSS_Buckets_BucketKey_Objects_ObjectKey_Signed -->
+<g id="edge15" class="edge">
+<title>OSS_Buckets_BucketKey_Objects_ObjectKey-&gt;OSS_Buckets_BucketKey_Objects_ObjectKey_Signed</title>
+<path fill="none" stroke="black" d="M866.39,-210.32C891.99,-215.66 925.18,-222.5 954.71,-228.3 979.66,-233.2 1006.76,-238.34 1031.69,-242.99"/>
+<polygon fill="black" stroke="black" points="1031.01,-246.42 1041.48,-244.81 1032.29,-239.54 1031.01,-246.42"/>
+</g>
+<!-- OSS_Buckets_BucketKey_Objects_ObjectKey_CopyTo -->
+<g id="node17" class="node">
+<title>OSS_Buckets_BucketKey_Objects_ObjectKey_CopyTo</title>
+<path fill="none" stroke="black" d="M966.71,-183.3C966.71,-183.3 1276.77,-183.3 1276.77,-183.3 1282.77,-183.3 1288.77,-189.3 1288.77,-195.3 1288.77,-195.3 1288.77,-207.3 1288.77,-207.3 1288.77,-213.3 1282.77,-219.3 1276.77,-219.3 1276.77,-219.3 966.71,-219.3 966.71,-219.3 960.71,-219.3 954.71,-213.3 954.71,-207.3 954.71,-207.3 954.71,-195.3 954.71,-195.3 954.71,-189.3 960.71,-183.3 966.71,-183.3"/>
+<text text-anchor="middle" x="1121.74" y="-197.2" font-family="Times,serif" font-size="14.00">OSS_Buckets_BucketKey_Objects_ObjectKey_CopyTo</text>
+</g>
+<!-- OSS_Buckets_BucketKey_Objects_ObjectKey&#45;&gt;OSS_Buckets_BucketKey_Objects_ObjectKey_CopyTo -->
+<g id="edge16" class="edge">
+<title>OSS_Buckets_BucketKey_Objects_ObjectKey-&gt;OSS_Buckets_BucketKey_Objects_ObjectKey_CopyTo</title>
+<path fill="none" stroke="black" d="M866.51,-201.3C887.58,-201.3 914.53,-201.3 942.96,-201.3"/>
+<polygon fill="black" stroke="black" points="942.84,-204.8 952.84,-201.3 942.84,-197.8 942.84,-204.8"/>
+</g>
+<!-- OSS_Buckets_BucketKey_Objects_ObjectKey_SignedS3Download -->
+<g id="node18" class="node">
+<title>OSS_Buckets_BucketKey_Objects_ObjectKey_SignedS3Download</title>
+<path fill="none" stroke="black" d="M1056.33,-122.5C1056.33,-122.5 1187.15,-122.5 1187.15,-122.5 1193.15,-122.5 1199.15,-128.5 1199.15,-134.5 1199.15,-134.5 1199.15,-152.1 1199.15,-152.1 1199.15,-158.1 1193.15,-164.1 1187.15,-164.1 1187.15,-164.1 1056.33,-164.1 1056.33,-164.1 1050.33,-164.1 1044.33,-158.1 1044.33,-152.1 1044.33,-152.1 1044.33,-134.5 1044.33,-134.5 1044.33,-128.5 1050.33,-122.5 1056.33,-122.5"/>
+<text text-anchor="middle" x="1121.74" y="-147.5" font-family="Times,serif" font-size="14.00">GET /signeds3download</text>
+<text text-anchor="middle" x="1121.74" y="-130.7" font-family="Times,serif" font-size="14.00">(signed_s3_download)</text>
+</g>
+<!-- OSS_Buckets_BucketKey_Objects_ObjectKey&#45;&gt;OSS_Buckets_BucketKey_Objects_ObjectKey_SignedS3Download -->
+<g id="edge17" class="edge">
+<title>OSS_Buckets_BucketKey_Objects_ObjectKey-&gt;OSS_Buckets_BucketKey_Objects_ObjectKey_SignedS3Download</title>
+<path fill="none" stroke="black" d="M866.36,-191.81C891.95,-186.22 925.14,-179.13 954.71,-173.3 980.12,-168.29 1007.78,-163.16 1033.11,-158.6"/>
+<polygon fill="black" stroke="black" points="1033.47,-162.09 1042.69,-156.88 1032.23,-155.2 1033.47,-162.09"/>
+</g>
+<!-- OSS_Buckets_BucketKey_Objects_ObjectKey_SignedS3Upload_Get -->
+<g id="node19" class="node">
+<title>OSS_Buckets_BucketKey_Objects_ObjectKey_SignedS3Upload_Get</title>
+<path fill="none" stroke="black" d="M1064.88,-61.5C1064.88,-61.5 1178.59,-61.5 1178.59,-61.5 1184.59,-61.5 1190.59,-67.5 1190.59,-73.5 1190.59,-73.5 1190.59,-91.1 1190.59,-91.1 1190.59,-97.1 1184.59,-103.1 1178.59,-103.1 1178.59,-103.1 1064.88,-103.1 1064.88,-103.1 1058.88,-103.1 1052.88,-97.1 1052.88,-91.1 1052.88,-91.1 1052.88,-73.5 1052.88,-73.5 1052.88,-67.5 1058.88,-61.5 1064.88,-61.5"/>
+<text text-anchor="middle" x="1121.74" y="-86.5" font-family="Times,serif" font-size="14.00">GET /signeds3upload</text>
+<text text-anchor="middle" x="1121.74" y="-69.7" font-family="Times,serif" font-size="14.00">(signed_s3_upload)</text>
+</g>
+<!-- OSS_Buckets_BucketKey_Objects_ObjectKey&#45;&gt;OSS_Buckets_BucketKey_Objects_ObjectKey_SignedS3Upload_Get -->
+<g id="edge18" class="edge">
+<title>OSS_Buckets_BucketKey_Objects_ObjectKey-&gt;OSS_Buckets_BucketKey_Objects_ObjectKey_SignedS3Upload_Get</title>
+<path fill="none" stroke="black" d="M844.78,-183.07C869.46,-162.79 912.33,-130.61 954.71,-113.3 982.02,-102.14 1013.52,-94.96 1041.69,-90.36"/>
+<polygon fill="black" stroke="black" points="1041.87,-93.87 1051.22,-88.89 1040.81,-86.96 1041.87,-93.87"/>
+</g>
+<!-- OSS_Buckets_BucketKey_Objects_ObjectKey_SignedS3Upload_Post -->
+<g id="node20" class="node">
+<title>OSS_Buckets_BucketKey_Objects_ObjectKey_SignedS3Upload_Post</title>
+<path fill="none" stroke="black" d="M1041.37,-0.5C1041.37,-0.5 1202.11,-0.5 1202.11,-0.5 1208.11,-0.5 1214.11,-6.5 1214.11,-12.5 1214.11,-12.5 1214.11,-30.1 1214.11,-30.1 1214.11,-36.1 1208.11,-42.1 1202.11,-42.1 1202.11,-42.1 1041.37,-42.1 1041.37,-42.1 1035.37,-42.1 1029.37,-36.1 1029.37,-30.1 1029.37,-30.1 1029.37,-12.5 1029.37,-12.5 1029.37,-6.5 1035.37,-0.5 1041.37,-0.5"/>
+<text text-anchor="middle" x="1121.74" y="-25.5" font-family="Times,serif" font-size="14.00">POST /signeds3upload</text>
+<text text-anchor="middle" x="1121.74" y="-8.7" font-family="Times,serif" font-size="14.00">(complete_signed_s3_upload)</text>
+</g>
+<!-- OSS_Buckets_BucketKey_Objects_ObjectKey&#45;&gt;OSS_Buckets_BucketKey_Objects_ObjectKey_SignedS3Upload_Post -->
+<g id="edge19" class="edge">
+<title>OSS_Buckets_BucketKey_Objects_ObjectKey-&gt;OSS_Buckets_BucketKey_Objects_ObjectKey_SignedS3Upload_Post</title>
+<path fill="none" stroke="black" d="M834.08,-182.89C853.4,-150.71 897.95,-84.57 954.71,-52.3 973.9,-41.39 996.16,-34.22 1018.03,-29.52"/>
+<polygon fill="black" stroke="black" points="1018.44,-33.01 1027.57,-27.64 1017.09,-26.14 1018.44,-33.01"/>
+</g>
+<!-- OSS_SignedResources_Get -->
+<g id="node22" class="node">
+<title>OSS_SignedResources_Get</title>
+<path fill="none" stroke="black" d="M362.04,-298.5C362.04,-298.5 478.43,-298.5 478.43,-298.5 484.43,-298.5 490.43,-304.5 490.43,-310.5 490.43,-310.5 490.43,-328.1 490.43,-328.1 490.43,-334.1 484.43,-340.1 478.43,-340.1 478.43,-340.1 362.04,-340.1 362.04,-340.1 356.04,-340.1 350.04,-334.1 350.04,-328.1 350.04,-328.1 350.04,-310.5 350.04,-310.5 350.04,-304.5 356.04,-298.5 362.04,-298.5"/>
+<text text-anchor="middle" x="420.23" y="-323.5" font-family="Times,serif" font-size="14.00">GET /</text>
+<text text-anchor="middle" x="420.23" y="-306.7" font-family="Times,serif" font-size="14.00">(get_signed_resource)</text>
+</g>
+<!-- OSS_SignedResources&#45;&gt;OSS_SignedResources_Get -->
+<g id="edge21" class="edge">
+<title>OSS_SignedResources-&gt;OSS_SignedResources_Get</title>
+<path fill="none" stroke="black" d="M271.26,-276.77C292.54,-282.88 316.5,-289.77 338.84,-296.19"/>
+<polygon fill="black" stroke="black" points="337.63,-299.49 348.2,-298.88 339.56,-292.76 337.63,-299.49"/>
+</g>
+<!-- OSS_SignedResources_Put -->
+<g id="node23" class="node">
+<title>OSS_SignedResources_Put</title>
+<path fill="none" stroke="black" d="M351.54,-237.5C351.54,-237.5 488.93,-237.5 488.93,-237.5 494.93,-237.5 500.93,-243.5 500.93,-249.5 500.93,-249.5 500.93,-267.1 500.93,-267.1 500.93,-273.1 494.93,-279.1 488.93,-279.1 488.93,-279.1 351.54,-279.1 351.54,-279.1 345.54,-279.1 339.54,-273.1 339.54,-267.1 339.54,-267.1 339.54,-249.5 339.54,-249.5 339.54,-243.5 345.54,-237.5 351.54,-237.5"/>
+<text text-anchor="middle" x="420.23" y="-262.5" font-family="Times,serif" font-size="14.00">PUT /</text>
+<text text-anchor="middle" x="420.23" y="-245.7" font-family="Times,serif" font-size="14.00">(upload_signed_resource)</text>
+</g>
+<!-- OSS_SignedResources&#45;&gt;OSS_SignedResources_Put -->
+<g id="edge22" class="edge">
+<title>OSS_SignedResources-&gt;OSS_SignedResources_Put</title>
+<path fill="none" stroke="black" d="M280.64,-258.3C295.86,-258.3 312.07,-258.3 327.83,-258.3"/>
+<polygon fill="black" stroke="black" points="327.7,-261.8 337.7,-258.3 327.7,-254.8 327.7,-261.8"/>
+</g>
+<!-- OSS_SignedResources_Delete -->
+<g id="node24" class="node">
+<title>OSS_SignedResources_Delete</title>
+<path fill="none" stroke="black" d="M353.88,-176.5C353.88,-176.5 486.59,-176.5 486.59,-176.5 492.59,-176.5 498.59,-182.5 498.59,-188.5 498.59,-188.5 498.59,-206.1 498.59,-206.1 498.59,-212.1 492.59,-218.1 486.59,-218.1 486.59,-218.1 353.88,-218.1 353.88,-218.1 347.88,-218.1 341.88,-212.1 341.88,-206.1 341.88,-206.1 341.88,-188.5 341.88,-188.5 341.88,-182.5 347.88,-176.5 353.88,-176.5"/>
+<text text-anchor="middle" x="420.23" y="-201.5" font-family="Times,serif" font-size="14.00">DELETE /</text>
+<text text-anchor="middle" x="420.23" y="-184.7" font-family="Times,serif" font-size="14.00">(delete_signed_resource)</text>
+</g>
+<!-- OSS_SignedResources&#45;&gt;OSS_SignedResources_Delete -->
+<g id="edge23" class="edge">
+<title>OSS_SignedResources-&gt;OSS_SignedResources_Delete</title>
+<path fill="none" stroke="black" d="M271.26,-239.83C291.1,-234.13 313.27,-227.76 334.28,-221.72"/>
+<polygon fill="black" stroke="black" points="335.05,-225.14 343.69,-219.01 333.12,-218.41 335.05,-225.14"/>
+</g>
+<!-- OSS_SignedResources_Resumable -->
+<g id="node25" class="node">
+<title>OSS_SignedResources_Resumable</title>
+<path fill="none" stroke="black" d="M328.21,-115.5C328.21,-115.5 512.26,-115.5 512.26,-115.5 518.26,-115.5 524.26,-121.5 524.26,-127.5 524.26,-127.5 524.26,-145.1 524.26,-145.1 524.26,-151.1 518.26,-157.1 512.26,-157.1 512.26,-157.1 328.21,-157.1 328.21,-157.1 322.21,-157.1 316.21,-151.1 316.21,-145.1 316.21,-145.1 316.21,-127.5 316.21,-127.5 316.21,-121.5 322.21,-115.5 328.21,-115.5"/>
+<text text-anchor="middle" x="420.23" y="-140.5" font-family="Times,serif" font-size="14.00">PUT /resumable</text>
+<text text-anchor="middle" x="420.23" y="-123.7" font-family="Times,serif" font-size="14.00">(upload_signed_resources_chunk)</text>
+</g>
+<!-- OSS_SignedResources&#45;&gt;OSS_SignedResources_Resumable -->
+<g id="edge24" class="edge">
+<title>OSS_SignedResources-&gt;OSS_SignedResources_Resumable</title>
+<path fill="none" stroke="black" d="M224.26,-240.03C244.5,-219.6 279.91,-186.82 316.21,-167.3 319.64,-165.45 323.2,-163.7 326.84,-162.04"/>
+<polygon fill="black" stroke="black" points="328.06,-165.32 335.9,-158.19 325.32,-158.88 328.06,-165.32"/>
+</g>
+</g>
+</svg>

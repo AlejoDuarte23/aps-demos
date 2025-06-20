@@ -13,3 +13,8 @@ wheels/
 *.dwg
 .python-version
 .mypy_cache
+.pyproject.toml
+.vscode/
+reference/
+testfile/
+venv/

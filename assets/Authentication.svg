@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="726pt" height="372pt" viewBox="0.00 0.00 726.08 371.60">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 367.6)">
+<title>Authentication_API_Tree</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-367.6 722.08,-367.6 722.08,4 -4,4"/>
+<!-- Auth_Service -->
+<g id="node1" class="node">
+<title>Auth_Service</title>
+<ellipse fill="gold" stroke="black" cx="86.4" cy="-128.3" rx="86.4" ry="18"/>
+<text text-anchor="middle" x="86.4" y="-124.1" font-family="Times,serif" font-size="14.00">Authentication API</text>
+</g>
+<!-- Auth_V2 -->
+<g id="node2" class="node">
+<title>Auth_V2</title>
+<path fill="none" stroke="black" d="M376.87,-203.3C376.87,-203.3 283.79,-203.3 283.79,-203.3 277.79,-203.3 271.79,-197.3 271.79,-191.3 271.79,-191.3 271.79,-179.3 271.79,-179.3 271.79,-173.3 277.79,-167.3 283.79,-167.3 283.79,-167.3 376.87,-167.3 376.87,-167.3 382.87,-167.3 388.87,-173.3 388.87,-179.3 388.87,-179.3 388.87,-191.3 388.87,-191.3 388.87,-197.3 382.87,-203.3 376.87,-203.3"/>
+<text text-anchor="middle" x="330.33" y="-181.1" font-family="Times,serif" font-size="14.00">/authentication/v2</text>
+</g>
+<!-- Auth_Service&#45;&gt;Auth_V2 -->
+<g id="edge1" class="edge">
+<title>Auth_Service-&gt;Auth_V2</title>
+<path fill="none" stroke="black" d="M142.94,-142.3C163.6,-147.43 187.25,-153.22 208.8,-158.3 225.5,-162.23 243.52,-166.34 260.42,-170.14"/>
+<polygon fill="black" stroke="black" points="259.34,-173.48 269.86,-172.25 260.87,-166.65 259.34,-173.48"/>
+</g>
+<!-- Auth_WellKnown -->
+<g id="node9" class="node">
+<title>Auth_WellKnown</title>
+<path fill="none" stroke="black" d="M220.8,-107.5C220.8,-107.5 439.86,-107.5 439.86,-107.5 445.86,-107.5 451.86,-113.5 451.86,-119.5 451.86,-119.5 451.86,-137.1 451.86,-137.1 451.86,-143.1 445.86,-149.1 439.86,-149.1 439.86,-149.1 220.8,-149.1 220.8,-149.1 214.8,-149.1 208.8,-143.1 208.8,-137.1 208.8,-137.1 208.8,-119.5 208.8,-119.5 208.8,-113.5 214.8,-107.5 220.8,-107.5"/>
+<text text-anchor="middle" x="330.33" y="-132.5" font-family="Times,serif" font-size="14.00">GET /.well-known/openid-configuration</text>
+<text text-anchor="middle" x="330.33" y="-115.7" font-family="Times,serif" font-size="14.00">(get-oidc-spec)</text>
+</g>
+<!-- Auth_Service&#45;&gt;Auth_WellKnown -->
+<g id="edge8" class="edge">
+<title>Auth_Service-&gt;Auth_WellKnown</title>
+<path fill="none" stroke="black" d="M173.04,-128.3C180.98,-128.3 189.15,-128.3 197.38,-128.3"/>
+<polygon fill="black" stroke="black" points="197.12,-131.8 207.12,-128.3 197.12,-124.8 197.12,-131.8"/>
+</g>
+<!-- Auth_UserInfo -->
+<g id="node10" class="node">
+<title>Auth_UserInfo</title>
+<path fill="none" stroke="black" d="M293.52,-46.5C293.52,-46.5 367.14,-46.5 367.14,-46.5 373.14,-46.5 379.14,-52.5 379.14,-58.5 379.14,-58.5 379.14,-76.1 379.14,-76.1 379.14,-82.1 373.14,-88.1 367.14,-88.1 367.14,-88.1 293.52,-88.1 293.52,-88.1 287.52,-88.1 281.52,-82.1 281.52,-76.1 281.52,-76.1 281.52,-58.5 281.52,-58.5 281.52,-52.5 287.52,-46.5 293.52,-46.5"/>
+<text text-anchor="middle" x="330.33" y="-71.5" font-family="Times,serif" font-size="14.00">GET /userinfo</text>
+<text text-anchor="middle" x="330.33" y="-54.7" font-family="Times,serif" font-size="14.00">(get-user-info)</text>
+</g>
+<!-- Auth_Service&#45;&gt;Auth_UserInfo -->
+<g id="edge9" class="edge">
+<title>Auth_Service-&gt;Auth_UserInfo</title>
+<path fill="none" stroke="black" d="M142.9,-114.31C180.87,-104.73 231.14,-92.06 269.92,-82.28"/>
+<polygon fill="black" stroke="black" points="270.73,-85.69 279.57,-79.85 269.02,-78.9 270.73,-85.69"/>
+</g>
+<!-- Auth_V2_Authorize -->
+<g id="node3" class="node">
+<title>Auth_V2_Authorize</title>
+<path fill="none" stroke="black" d="M563.62,-321.5C563.62,-321.5 642.31,-321.5 642.31,-321.5 648.31,-321.5 654.31,-327.5 654.31,-333.5 654.31,-333.5 654.31,-351.1 654.31,-351.1 654.31,-357.1 648.31,-363.1 642.31,-363.1 642.31,-363.1 563.62,-363.1 563.62,-363.1 557.62,-363.1 551.62,-357.1 551.62,-351.1 551.62,-351.1 551.62,-333.5 551.62,-333.5 551.62,-327.5 557.62,-321.5 563.62,-321.5"/>
+<text text-anchor="middle" x="602.97" y="-346.5" font-family="Times,serif" font-size="14.00">GET /authorize</text>
+<text text-anchor="middle" x="602.97" y="-329.7" font-family="Times,serif" font-size="14.00">(authorize)</text>
+</g>
+<!-- Auth_V2&#45;&gt;Auth_V2_Authorize -->
+<g id="edge2" class="edge">
+<title>Auth_V2-&gt;Auth_V2_Authorize</title>
+<path fill="none" stroke="black" d="M348.83,-203.57C376.04,-230.94 431.29,-282.46 487.86,-311.3 504.14,-319.6 522.9,-325.88 540.44,-330.53"/>
+<polygon fill="black" stroke="black" points="539.15,-333.82 549.7,-332.86 540.85,-327.03 539.15,-333.82"/>
+</g>
+<!-- Auth_V2_Revoke -->
+<g id="node4" class="node">
+<title>Auth_V2_Revoke</title>
+<path fill="none" stroke="black" d="M567.11,-260.5C567.11,-260.5 638.82,-260.5 638.82,-260.5 644.82,-260.5 650.82,-266.5 650.82,-272.5 650.82,-272.5 650.82,-290.1 650.82,-290.1 650.82,-296.1 644.82,-302.1 638.82,-302.1 638.82,-302.1 567.11,-302.1 567.11,-302.1 561.11,-302.1 555.11,-296.1 555.11,-290.1 555.11,-290.1 555.11,-272.5 555.11,-272.5 555.11,-266.5 561.11,-260.5 567.11,-260.5"/>
+<text text-anchor="middle" x="602.97" y="-285.5" font-family="Times,serif" font-size="14.00">POST /revoke</text>
+<text text-anchor="middle" x="602.97" y="-268.7" font-family="Times,serif" font-size="14.00">(revoke)</text>
+</g>
+<!-- Auth_V2&#45;&gt;Auth_V2_Revoke -->
+<g id="edge3" class="edge">
+<title>Auth_V2-&gt;Auth_V2_Revoke</title>
+<path fill="none" stroke="black" d="M371.65,-203.72C402.94,-217.61 447.63,-236.54 487.86,-250.3 505.79,-256.43 525.64,-262.17 543.68,-267.01"/>
+<polygon fill="black" stroke="black" points="542.62,-270.35 553.18,-269.51 544.4,-263.58 542.62,-270.35"/>
+</g>
+<!-- Auth_V2_Keys -->
+<g id="node5" class="node">
+<title>Auth_V2_Keys</title>
+<path fill="none" stroke="black" d="M576.83,-199.5C576.83,-199.5 629.1,-199.5 629.1,-199.5 635.1,-199.5 641.1,-205.5 641.1,-211.5 641.1,-211.5 641.1,-229.1 641.1,-229.1 641.1,-235.1 635.1,-241.1 629.1,-241.1 629.1,-241.1 576.83,-241.1 576.83,-241.1 570.83,-241.1 564.83,-235.1 564.83,-229.1 564.83,-229.1 564.83,-211.5 564.83,-211.5 564.83,-205.5 570.83,-199.5 576.83,-199.5"/>
+<text text-anchor="middle" x="602.97" y="-224.5" font-family="Times,serif" font-size="14.00">GET /keys</text>
+<text text-anchor="middle" x="602.97" y="-207.7" font-family="Times,serif" font-size="14.00">(get-keys)</text>
+</g>
+<!-- Auth_V2&#45;&gt;Auth_V2_Keys -->
+<g id="edge4" class="edge">
+<title>Auth_V2-&gt;Auth_V2_Keys</title>
+<path fill="none" stroke="black" d="M389.06,-192.77C438,-199.1 507.4,-208.07 553.5,-214.03"/>
+<polygon fill="black" stroke="black" points="552.83,-217.47 563.2,-215.29 553.73,-210.53 552.83,-217.47"/>
+</g>
+<!-- Auth_V2_Token -->
+<g id="node6" class="node">
+<title>Auth_V2_Token</title>
+<path fill="none" stroke="black" d="M499.86,-122.1C499.86,-122.1 706.08,-122.1 706.08,-122.1 712.08,-122.1 718.08,-128.1 718.08,-134.1 718.08,-134.1 718.08,-168.5 718.08,-168.5 718.08,-174.5 712.08,-180.5 706.08,-180.5 706.08,-180.5 499.86,-180.5 499.86,-180.5 493.86,-180.5 487.86,-174.5 487.86,-168.5 487.86,-168.5 487.86,-134.1 487.86,-134.1 487.86,-128.1 493.86,-122.1 499.86,-122.1"/>
+<text text-anchor="middle" x="602.97" y="-163.9" font-family="Times,serif" font-size="14.00">POST /token</text>
+<text text-anchor="middle" x="602.97" y="-147.1" font-family="Times,serif" font-size="14.00">(fetch-token)</text>
+<text text-anchor="middle" x="602.97" y="-130.3" font-family="Times,serif" font-size="14.00">(also exchange-jwt-assertion for SSA)</text>
+</g>
+<!-- Auth_V2&#45;&gt;Auth_V2_Token -->
+<g id="edge5" class="edge">
+<title>Auth_V2-&gt;Auth_V2_Token</title>
+<path fill="none" stroke="black" d="M389.06,-178.05C414.63,-174.83 445.8,-170.92 476.31,-167.09"/>
+<polygon fill="black" stroke="black" points="476.52,-170.59 486,-165.87 475.64,-163.64 476.52,-170.59"/>
+</g>
+<!-- Auth_V2_Introspect -->
+<g id="node7" class="node">
+<title>Auth_V2_Introspect</title>
+<path fill="none" stroke="black" d="M555.65,-61.5C555.65,-61.5 650.28,-61.5 650.28,-61.5 656.28,-61.5 662.28,-67.5 662.28,-73.5 662.28,-73.5 662.28,-91.1 662.28,-91.1 662.28,-97.1 656.28,-103.1 650.28,-103.1 650.28,-103.1 555.65,-103.1 555.65,-103.1 549.65,-103.1 543.65,-97.1 543.65,-91.1 543.65,-91.1 543.65,-73.5 543.65,-73.5 543.65,-67.5 549.65,-61.5 555.65,-61.5"/>
+<text text-anchor="middle" x="602.97" y="-86.5" font-family="Times,serif" font-size="14.00">POST /introspect</text>
+<text text-anchor="middle" x="602.97" y="-69.7" font-family="Times,serif" font-size="14.00">(introspect_token)</text>
+</g>
+<!-- Auth_V2&#45;&gt;Auth_V2_Introspect -->
+<g id="edge6" class="edge">
+<title>Auth_V2-&gt;Auth_V2_Introspect</title>
+<path fill="none" stroke="black" d="M389.32,-180.48C410.25,-176.71 433.28,-170.04 451.86,-158.3 473.8,-144.43 466.17,-126.57 487.86,-112.3 501.08,-103.6 516.71,-97.42 532.09,-93.03"/>
+<polygon fill="black" stroke="black" points="532.95,-96.43 541.75,-90.52 531.19,-89.65 532.95,-96.43"/>
+</g>
+<!-- Auth_V2_Logout -->
+<g id="node8" class="node">
+<title>Auth_V2_Logout</title>
+<path fill="none" stroke="black" d="M571.78,-0.5C571.78,-0.5 634.16,-0.5 634.16,-0.5 640.16,-0.5 646.16,-6.5 646.16,-12.5 646.16,-12.5 646.16,-30.1 646.16,-30.1 646.16,-36.1 640.16,-42.1 634.16,-42.1 634.16,-42.1 571.78,-42.1 571.78,-42.1 565.78,-42.1 559.78,-36.1 559.78,-30.1 559.78,-30.1 559.78,-12.5 559.78,-12.5 559.78,-6.5 565.78,-0.5 571.78,-0.5"/>
+<text text-anchor="middle" x="602.97" y="-25.5" font-family="Times,serif" font-size="14.00">GET /logout</text>
+<text text-anchor="middle" x="602.97" y="-8.7" font-family="Times,serif" font-size="14.00">(logout)</text>
+</g>
+<!-- Auth_V2&#45;&gt;Auth_V2_Logout -->
+<g id="edge7" class="edge">
+<title>Auth_V2-&gt;Auth_V2_Logout</title>
+<path fill="none" stroke="black" d="M389.25,-184.05C411.16,-180.8 434.87,-173.56 451.86,-158.3 488.87,-125.05 451.6,-86.37 487.86,-52.3 504.15,-36.99 527.24,-29.09 548.39,-25.08"/>
+<polygon fill="black" stroke="black" points="548.75,-28.56 558.06,-23.51 547.63,-21.65 548.75,-28.56"/>
+</g>
+</g>
+</svg>
