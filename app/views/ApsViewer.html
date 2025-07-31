@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>APS Viewer</title>
+
+    <!-- Fixed Viewer version -->
+    <link rel="stylesheet"
+          href="https://developer.api.autodesk.com/modelderivative/v2/viewers/7.72/style.min.css"
+          type="text/css">
+    <script src="https://developer.api.autodesk.com/modelderivative/v2/viewers/7.72/viewer3D.min.js"></script>
+
+    <style>
+        body { margin: 0; }
+        #apsViewerDiv { width: 100%; height: 100%; position: absolute; }
+    </style>
+</head>
+
+<body>
+    <div id="apsViewerDiv"></div>
+
+    <script>
+        /* Replace by the controller */
+        const accessToken = 'APS_TOKEN_PLACEHOLDER';
+        const documentId  = 'urn:URN_PLACEHOLDER';
+
+        /* Basic logging */
+        console.log('Viewer script loaded:', typeof Autodesk);
+        console.log('Document ID:', documentId.slice(0, 40) + '…');
+        console.log('Token length:', accessToken.length, 'chars');
+
+        Autodesk.Viewing.Initializer(
+            { env: 'AutodeskProduction', accessToken },
+            () => Autodesk.Viewing.Document.load(
+                documentId,
+                onDocumentLoadSuccess,
+                onDocumentLoadFailure
+            )
+        );
+
+        function onDocumentLoadSuccess(doc) {
+            const viewable = doc.getRoot().getDefaultGeometry();
+            const viewer   = new Autodesk.Viewing.GuiViewer3D(
+                                document.getElementById('apsViewerDiv'));
+            viewer.start();
+            viewer.loadDocumentNode(doc, viewable, { keepCurrentModels: true })
+                  .then(() => {
+                      console.log('Model loaded');
+                      viewer.showModelStructurePanel(true);
+                  })
+                  .catch(e => console.error('loadDocumentNode error:', e));
+        }
+
+        function onDocumentLoadFailure(code, msg) {
+            console.error('Document load failure:', code, msg);
+        }
+    </script>
+</body>
+</html>

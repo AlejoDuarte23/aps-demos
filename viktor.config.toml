@@ -1,0 +1,6 @@
+app_type = "simple"
+python_version = "3.12"
+registered_name = "aps-demos"
+oauth2_integrations = [
+  "aps-integration-1"
+]
