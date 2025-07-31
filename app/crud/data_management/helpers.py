@@ -262,3 +262,36 @@ def get_files_names_from_sub_folder(token, hub_name, project_name, subfolder_pat
         return [f"Folder ID not found for {subfolder_path}"]
     items = get_items_in_folder(project_id, folder_id, token)
     return items or [f"No items in {subfolder_path}"]
+
+
+def get_file_content(token: str, hub_name: str, project_name: str, subfolder_path: str, file_name: str) -> bytes:
+    """
+    Wrapper to get raw binary content of a file given navigation names.
+    """
+    hub_id = get_hub_id_by_name(token, hub_name)
+    if not hub_id:
+        raise ValueError(f"Could not find hub with name '{hub_name}'")
+    project_id = get_project_id_by_name(token, hub_id, project_name)
+    if not project_id:
+        raise ValueError(f"Could not find project '{project_name}'")
+    all_paths_with_ids = get_all_folder_paths_with_ids(hub_id, project_id, token)
+    folder_id = next((fid for path, fid in all_paths_with_ids if path == subfolder_path), None)
+    if not folder_id:
+        raise ValueError(f"Could not find folder ID for path '{subfolder_path}'")
+    contents = datamanagement_core.get_folder_contents(project_id, folder_id, token)
+    item_id = None
+    for item in contents.data:
+        if item.type == "items" and item.attributes.displayName == file_name:
+            item_id = item.id
+            break
+    if not item_id:
+        raise ValueError(f"Could not find item ID for file '{file_name}'")
+    versions = datamanagement_core.get_item_versions(project_id, item_id, token)
+    if not versions:
+        raise ValueError("No versions found for this item")
+    latest_version = versions[0]
+    storage_urn = latest_version.get("relationships", {}).get("storage", {}).get("data", {}).get("id")
+    if not storage_urn:
+        raise ValueError("Could not find storage location for this version")
+    file_content = datamanagement_core.download_file_content(storage_urn, token)
+    return file_content
