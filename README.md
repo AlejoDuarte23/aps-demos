@@ -1,4 +1,4 @@
-# APS - VIKTOR Sample Integration
+# APS - VIKTOR Sample Integration (WIP)
 
 This project demonstrates a simple integration between Autodesk Platform Services (APS) and the VIKTOR platform. It showcases how to use the APS Viewer, authentication, and Data Management API within a VIKTOR app.
 
