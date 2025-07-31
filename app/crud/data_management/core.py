@@ -103,3 +103,40 @@ def get_model_views_and_metadata(urn, token):
     else:
         print(f"    - Could not retrieve metadata for {urn}. Status: {metadata_response.status_code}")
         return None
+
+def download_file_content(storage_urn, token):
+    """
+    Downloads the actual content of a file from OSS given its storage URN.
+    """
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # 1. Parse the URN to get the bucket key and object key
+    # Example URN: "urn:adsk.objects:os.object:wip.dm.prod/abcdef.ifc"
+    urn_parts = storage_urn.split(':')
+    object_id = urn_parts[-1]
+    bucket_key, object_key = object_id.split('/')
+    
+    encoded_bucket_key = urllib.parse.quote(bucket_key)
+    encoded_object_key = urllib.parse.quote(object_key)
+
+    # 2. Get a temporary, signed S3 URL to download the file directly
+    # This is the most efficient method as it bypasses APS servers for the download.
+    s3_url_endpoint = f"{APS_BASE_URL}/oss/v2/buckets/{encoded_bucket_key}/objects/{encoded_object_key}/signeds3download"
+    
+    s3_response = requests.get(s3_url_endpoint, headers=headers)
+    s3_response.raise_for_status()
+    s3_data = s3_response.json()
+    
+    # The response will contain a URL to download from. If the object was uploaded in chunks
+    # it might contain multiple URLs. For most ACC files, it will be one.
+    download_url = s3_data.get('url')
+    if not download_url:
+        raise ValueError("Could not retrieve the S3 download URL from APS.")
+
+    # 3. Use the S3 URL to get the file content
+    # Note: No auth headers are needed for the S3 URL itself.
+    file_response = requests.get(download_url)
+    file_response.raise_for_status()
+    
+    # The content is in binary format
+    return file_response.content
