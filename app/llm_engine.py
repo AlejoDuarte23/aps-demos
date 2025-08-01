@@ -15,6 +15,7 @@ from app.types import MembersDict, CrossSectionInfo
 from app.plots.model_viz import plot_3d_model
 from app.plots.piles import plot_3d_with_foundations, collect_support_nodes, group_four_pile_sets
 from app.plots.footings import plot_structure_with_footing, group_four_pedestal_sets, collect_support_nodes as collect_footnng_support_nodes
+from app.plots.caisson import group_caisson_locations, plot_3d_with_caissons
 from app.geometry.utils import get_nodes_lines
 
 logger = logging.getLogger(__name__)
@@ -37,6 +38,16 @@ class PlotFootingModel(BaseModel):
     SLAB_THICK: float = Field(..., description="Thickness of the footing slab.")
     EDGE_COVER: float = Field(..., description="Distance from outer pedestals to the slab edge.")
     CLUSTER_TOL: float = Field(default=3.0, description="Tolerance for grouping support nodes.")
+
+class PlotModelWithCaisson(BaseModel):
+    """Pydantic model defining the parameters for a caisson foundation."""
+    CAISSON_WIDTH: float = Field(..., description="Caisson width (along the X-axis)")
+    CAISSON_DEPTH: float = Field(..., description="Caisson depth (along the Y-axis)")
+    CAISSON_THICKNESS: float = Field(..., description="Caisson thickness or height (along the Z-axis)")
+    CLUSTER_TOL: float = Field(..., description="Tolerance for grouping support nodes into a single foundation")
+
+
+
 # FOUNDATION_PARAMS = {
 #     'PILE_DIAM': 1.0,       # meters
 #     'PILE_LENGTH': 10.0,    # meters
@@ -46,7 +57,7 @@ class PlotFootingModel(BaseModel):
 
 class Response(BaseModel):
     response: str = Field(..., description="Be conversational firendly and Format the response always nicely")
-    selected_tool: Union[None , PlotModel, PlotModelWithPiles | PlotFootingModel] = Field(..., description="Select any of these tools, PlotModel to let the user visualize the model")
+    selected_tool: Union[None , PlotModel, PlotModelWithPiles | PlotFootingModel | PlotModelWithCaisson] = Field(..., description="Select any of these tools, PlotModel to let the user visualize the model")
 
 
 def llm_response(conversation_history: list[dict],
@@ -135,6 +146,24 @@ def execute_tool(response: Response) -> tuple[str, go.Figure | None]:
         footings = group_four_pedestal_sets(support_nodes, cluster_tol=footing_params_dict['CLUSTER_TOL'])
 
         fig = plot_structure_with_footing(nodes=nodes, lines=lines, members=members, cross_sections=cs_dict, footings=footings, footing_params=footing_params_dict)
+        return response.response, fig
+
+    if isinstance(response.selected_tool, PlotModelWithCaisson):
+        nodes, lines, members, cs_dict = get_model()
+        footing_params_dict = response.selected_tool.model_dump()
+        support_nodes = collect_support_nodes(nodes)
+        caisson_locations = group_caisson_locations(
+            support_nodes,
+            cluster_tol=footing_params_dict['CLUSTER_TOL']
+        )
+        fig = plot_3d_with_caissons(
+            nodes=nodes,
+            lines=lines,
+            members=members,
+            cross_sections=cs_dict,
+            caissons=caisson_locations,
+            foundation_params=footing_params_dict
+        )
         return response.response, fig
     
     return response.response, None
