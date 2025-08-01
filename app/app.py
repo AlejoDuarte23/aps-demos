@@ -1,3 +1,4 @@
+import requests
 import base64
 import urllib.parse
 import viktor as vkt  # type: ignore
@@ -76,7 +77,14 @@ def get_folder_files_options(params, **kwargs) -> list[str]:
 
 class Parametrization(vkt.Parametrization):
     step1 = vkt.Step("APS Integration", views="show_cad_model")
-    step1.title = vkt.Text("# APS Integration demo")
+    step1.title = vkt.Text(dedent(
+        """# APS Integration demo
+
+This **VIKTOR tool** allows you to fetch CAD files from **Autodesk Construction Cloud** (ACC) for structural analysis.
+An **AI Agent** will assist you in performing structural analysis in OpenSees, designing and optimizing foundations in Python, and updating the CAD file.
+You can then send the updated CAD file back to ACC!
+"""
+    ))
     step1.hubs = vkt.OptionField("Avaliable Hubs", options=get_hub_list)
     step1.project = vkt.OptionField("Avaliable Projects", options=get_projects)
     step1.br2 = vkt.LineBreak()
@@ -84,11 +92,21 @@ class Parametrization(vkt.Parametrization):
     step1.subfolder_path = vkt.OptionField("Subfolders Path", options=get_subfolder_paths_options)
     step1.br4 = vkt.LineBreak()
     step1.files = vkt.OptionField("Folder Files", options=get_folder_files_options)
-    step1.stored_file = vkt.OptionField("Select File for Agent Context", options=get_folder_files_options)
+    step1.stored_file = vkt.OptionField("Structural IFC", options=get_folder_files_options)
     step1.br5 = vkt.LineBreak()
-    step1.agent_contenxt = vkt.ActionButton("Send File to Agent", method="store_file_in_app")
+    step1.text2 = vkt.Text("## Fetch Data")
+    step1.agent_contenxt = vkt.ActionButton("Get files from  ACC", method="store_file_in_app")
+    # step1.upload_file = vkt.ActionButton("Upload File to ACC", method="send_data2acc")
+    
     step2 = vkt.Step("Structural Agent", views=["get_plotly_view"])
+    step2.text1 = vkt.Text(dedent(
+        """# Structural Agent
+
+Talk to an **AI agent** to analyze the structural model, **get reaction loads**, assess foundation alternatives (pile foundation, monopile/caisson, and footing), then generate and update the CAD file and push it to ACC.
+"""
+    ))
     step2.chat = vkt.Chat("", method="call_llm")
+
 class Controller(vkt.Controller):
     parametrization = Parametrization(width=40)
 
@@ -182,3 +200,132 @@ class Controller(vkt.Controller):
 
         return vkt.PlotlyResult(fig.to_json())
 
+    def send_data2acc(self, params, **kwargs):
+        """Upload an IFC file to ACC in the folder selected in the UI."""
+        # Get token and parameters from UI
+        token = get_aps_token()
+        print("hub", params.step1.hubs)
+        print("project", params.step1.project)
+        print("subfolder_path", params.step1.subfolder_path)
+        # Get project and folder IDs
+        hub_id = aps_helpers.get_hub_id_by_name(token, params.step1.hubs) # alejandroduartevendries@gmail.com
+        project_id = aps_helpers.get_project_id_by_name(token, hub_id, params.step1.project) # Sample Project - Seaport Civic Center
+        
+        # Get folder ID for the selected subfolder path
+        all_paths_with_ids = aps_helpers.get_all_folder_paths_with_ids(hub_id, project_id, token)
+        folder_id = next((fid for path, fid in all_paths_with_ids if path == params.step1.subfolder_path), None) # Files/Structural
+        
+        if not folder_id:
+            print(f"Could not find folder ID for path '{params.step1.subfolder_path}'")
+            return
+        
+        # Read the IFC file from disk
+        file_name = "Substation_Gantry_GA_with_piles.ifc"
+        ifc_file_path = os.path.join(os.path.dirname(__file__), 'geometry', file_name)
+        
+        with open(ifc_file_path, 'rb') as file:
+            file_content_bytes = file.read()
+        
+        # Constants
+        APS_BASE_URL = "https://developer.api.autodesk.com"
+        headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/vnd.api+json"}
+
+        # === Step 1: Create a Storage Location ===
+        storage_create_url = f"{APS_BASE_URL}/data/v1/projects/{project_id}/storage"
+        storage_payload = {
+            "jsonapi": {"version": "1.0"},
+            "data": {
+                "type": "objects",
+                "attributes": {
+                    "name": file_name
+                },
+                "relationships": {
+                    "target": {
+                        "data": {
+                            "type": "folders",
+                            "id": folder_id
+                        }
+                    }
+                }
+            }
+        }
+        
+        print("Step 1: Creating storage location...")
+        response = requests.post(storage_create_url, headers=headers, json=storage_payload)
+        response.raise_for_status()
+        storage_urn = response.json()["data"]["id"]
+        print(f"  > Storage URN created: {storage_urn}")
+
+        # The storage URN contains the bucket key and object key needed for the next steps
+        urn_parts = storage_urn.split(':')
+        object_id = urn_parts[-1]
+        bucket_key, object_key = object_id.split('/')
+        encoded_bucket_key = urllib.parse.quote(bucket_key)
+        encoded_object_key = urllib.parse.quote(object_key)
+
+        # === Step 2 (continued): Get Signed S3 Upload URL & Upload the File ===
+        signed_upload_url = f"{APS_BASE_URL}/oss/v2/buckets/{encoded_bucket_key}/objects/{encoded_object_key}/signeds3upload"
+        print("Step 2: Getting S3 signed URL and uploading file...")
+        s3_response = requests.get(signed_upload_url, headers={"Authorization": f"Bearer {token}"})
+        s3_response.raise_for_status()
+        s3_data = s3_response.json()
+
+        # You MUST capture the uploadKey from the response
+        upload_key = s3_data['uploadKey']
+        upload_url = s3_data['urls'][0]
+
+        # Upload the file content to the S3 URL
+        upload_response = requests.put(upload_url, data=file_content_bytes, headers={"Content-Type": "application/octet-stream"})
+        upload_response.raise_for_status()
+        print(f"  > File '{file_name}' uploaded to S3.")
+
+
+        # === THIS IS STEP 8 FROM THE TUTORIAL - THE MISSING PIECE ===
+        print("Step 2.5 (Completing Upload): Finalizing the upload with APS...")
+        complete_headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json"
+        }
+        complete_payload = {
+            "uploadKey": upload_key
+        }
+
+        # The endpoint is the *same* one used to get the signed URL
+        complete_response = requests.post(signed_upload_url, headers=complete_headers, json=complete_payload)
+        complete_response.raise_for_status()
+        print("  > Upload finalized and storage URN is now valid.")
+
+
+        # === THIS IS STEP 9 FROM THE TUTORIAL - CREATING THE ITEM ===
+        # Your code for this step is now correct and should work.
+        item_create_url = f"{APS_BASE_URL}/data/v1/projects/{project_id}/items"
+        item_payload = {
+            "jsonapi": {"version": "1.0"},
+            "data": {
+                "type": "items",
+                "attributes": {
+                    "displayName": file_name,
+                    "extension": {"type": "items:autodesk.bim360:File", "version": "1.0"}
+                },
+                "relationships": {
+                    "tip": {"data": {"type": "versions", "id": "1"}},
+                    "parent": {"data": {"type": "folders", "id": folder_id}}
+                }
+            },
+            "included": [{
+                "type": "versions",
+                "id": "1",
+                "attributes": {
+                    "name": file_name,
+                    "extension": {"type": "versions:autodesk.bim360:File", "version": "1.0"}
+                },
+                "relationships": {"storage": {"data": {"type": "objects", "id": storage_urn}}}
+            }]
+        }
+
+        print("Step 3 (Creating Item): Creating the file item in ACC...")
+        final_response = requests.post(item_create_url, headers=headers, json=item_payload)
+        final_response.raise_for_status()
+
+        # If you reach here, it was successful.
+        print(f"  > SUCCESS! File '{file_name}' is now visible in ACC.")
