@@ -17,13 +17,18 @@ from app.plots.piles import plot_3d_with_foundations, collect_support_nodes, gro
 from app.plots.footings import plot_structure_with_footing, group_four_pedestal_sets, collect_support_nodes as collect_footnng_support_nodes
 from app.plots.caisson import group_caisson_locations, plot_3d_with_caissons
 from app.geometry.utils import get_nodes_lines
-
+from app.opensees.model import Model, calculate_displacements
+from app.plots.model_defo import plot_deformed_mesh
 logger = logging.getLogger(__name__)
 load_dotenv()
 client = instructor.from_openai(OpenAI())
 
 class PlotModel(BaseModel):
     pass 
+
+class RunModel(BaseModel):
+    why: str = Field(..., description="Use this tool to analyse or run the model")
+    pass
 
 class PlotModelWithPiles(BaseModel):
     PILE_DIAM: float = Field(..., description="Pile diameter")
@@ -57,7 +62,7 @@ class PlotModelWithCaisson(BaseModel):
 
 class Response(BaseModel):
     response: str = Field(..., description="Be conversational firendly and Format the response always nicely")
-    selected_tool: Union[None , PlotModel, PlotModelWithPiles | PlotFootingModel | PlotModelWithCaisson] = Field(..., description="Select any of these tools, PlotModel to let the user visualize the model")
+    selected_tool: Union[None , PlotModel, PlotModelWithPiles ,PlotFootingModel, PlotModelWithCaisson, RunModel] = Field(..., description="Select any of these tools, Use any of   ")
 
 
 def llm_response(conversation_history: list[dict],
@@ -72,8 +77,7 @@ def llm_response(conversation_history: list[dict],
             You are a helpful assistant with the following context, who formats responses clearly and helps users analyze structures comming
             from Autodesk Construcction Cloud (ACC) using the VITKOR - APS Integration.
 
-
-            **Important**: Every time `selected_tool` is not `None`, the VIKTOR app will render the model with the specified inputs. You may say something like, “The structure will be rendered on the right-hand side of the application.”
+            Use AnalyzeModel to Analyze the model do not confuse that with 
             """
         )
     }
@@ -106,10 +110,10 @@ def get_model():
     my_cs = CrossSectionInfo(
         name = "L70x4",
         id = 1,
-        A=10,
-        Iz=100,
-        Iy=1000,
-        Jxx=2000,
+        A=100,
+        Iz=10000000000000000000,
+        Iy=10000000000000000000,
+        Jxx=20000000,
         b=0.070,
         h=0.070
     )
@@ -117,7 +121,6 @@ def get_model():
     cs_dict = {1 : my_cs}
     for line_id in lines:
         members[line_id] = {"line_id":line_id, "cross_section_id":1, "material_name": "Steel"}
-    print(nodes, lines, members, cs_dict)
     return nodes, lines, members, cs_dict
 
 def execute_tool(response: Response) -> tuple[str, go.Figure | None]:
@@ -127,7 +130,7 @@ def execute_tool(response: Response) -> tuple[str, go.Figure | None]:
     if isinstance(response.selected_tool, PlotModel):
         nodes, lines, members, cs_dict = get_model()
         fig = plot_3d_model(nodes, lines, members, cs_dict)
-        print(fig)
+        # print(fig)
         return response.response, fig
     
     if isinstance(response.selected_tool, PlotModelWithPiles):
@@ -164,6 +167,19 @@ def execute_tool(response: Response) -> tuple[str, go.Figure | None]:
             caissons=caisson_locations,
             foundation_params=footing_params_dict
         )
+        return response.response, fig
+    
+    if isinstance(response.selected_tool, RunModel):
+        nodes, lines, members, cs_dict = get_model()
+        my_model = Model(
+            nodes=nodes, lines=lines, cross_sections=cs_dict, members=members,
+        )
+        my_model.create_model()
+        my_model.run_model()
+        
+        disp_dict = calculate_displacements(lines=lines, nodes=nodes)
+        
+        fig = plot_deformed_mesh(disp_dict=disp_dict, members=members, cross_sections= cs_dict, nodes=nodes, lines=lines)
         return response.response, fig
     
     return response.response, None

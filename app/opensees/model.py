@@ -211,18 +211,18 @@ class Model:
     
 
 def calculate_displacements(lines:LinesDict, nodes:NodesDict):
-    disp_by_type: DefaultDict[str, list[float]] = defaultdict(list)
+    # disp_by_type: DefaultDict[str, list[float]] = defaultdict(list)
     disp_dict: dict[int, float] = {}
     for lineargs in lines.values():
         for node in (lineargs["Ni"], lineargs["Nj"]):
             disp = ops.nodeDisp(node)
             disp_z = disp[2]
-            disp_by_type[lineargs["Type"]].append(disp_z)
+            # disp_by_type[lineargs["Type"]].append(disp_z)
 
             if node not in disp_dict:
                 disp_dict[node] = disp_z
                         
-    max_disp_by_type = {eletype: min(disp_list) for eletype, disp_list in  disp_by_type.items()}   
+    # max_disp_by_type = {eletype: min(disp_list) for eletype, disp_list in  disp_by_type.items()}   
 
     for node in nodes:
         disp = ops.nodeDisp(node)
@@ -230,7 +230,7 @@ def calculate_displacements(lines:LinesDict, nodes:NodesDict):
         disp_dict[node] = disp_z
 
     
-    return max_disp_by_type, disp_dict
+    return disp_dict
 
 
 
