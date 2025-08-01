@@ -1,4 +1,13 @@
 viktor==14.23.0 
 python-dotenv>=1.1.0
 requests>=2.32.3
-pydantic
+pydantic==2.11.5
+python-dotenv
+openai==1.84.0
+numpy>=2.3.1
+openseespy==3.3.0.1
+kaleido==0.2.1; platform_system == "Linux"
+kaleido==0.1.0.post1; platform_system == "Windows"
+instructor==1.8.3
+plotly
+ifcopenshell
