@@ -163,7 +163,12 @@ def plot_structure_with_footing(
     y0, y1 = min(y_nodes), max(y_nodes)
     z0 = min(z_nodes) - footing_params.get("SLAB_THICK", 1.0)
     z1 = max(z_nodes)
-    fig.add_trace(go.Scatter3d(x=[x0, x1], y=[y0, y1], z=[z0, z1], mode='markers', marker=dict(size=0, color='rgba(0,0,0,0)')))
+    fig.add_trace(go.Scatter3d(
+        x=[x0, x1], y=[y0, y1], z=[z0, z1],
+        mode='markers',
+        marker=dict(size=0, color='rgba(0,0,0,0)'),
+        showlegend=False  # Ensure this trace does not appear in the legend
+    ))
 
     # --- 3. Draw Structure (Beams and Nodes) ---
     fig.add_trace(go.Scatter3d(x=x_nodes, y=y_nodes, z=z_nodes, mode="markers", marker=dict(size=3, color="black"), showlegend=False))
@@ -188,27 +193,33 @@ def plot_structure_with_footing(
             ys = [n['y'] for n in pedestal_nodes]
             center_x, center_y = sum(xs) / 4.0, sum(ys) / 4.0
 
-            # Use BASE_WIDTH for slab dimensions
             slab_width = fp["BASE_WIDTH"]
             slab_depth = fp["BASE_WIDTH"]
-            z_base = -fp["SLAB_THICK"]
+
+            # Find the minimum pedestal base z (so slab is always below all pedestals)
+            pedestal_base_zs = [n['z'] - fp["PEDESTAL_HEIGHT"] for n in pedestal_nodes]
+            slab_top_z = min(pedestal_base_zs)
+            slab_center_z = slab_top_z - fp["SLAB_THICK"] / 2.0
 
             # Draw the footing slab
-            slab_center = np.array([center_x, center_y, z_base + fp["SLAB_THICK"] / 2.0])
+            slab_center = np.array([center_x, center_y, slab_center_z])
             add_box_mesh(fig, slab_center, slab_width, slab_depth, fp["SLAB_THICK"], FOUNDATION_COLOR)
 
-            # Draw the individual pedestals on top of the slab
+            # Draw the individual pedestals below the nodes
             for node in pedestal_nodes:
-                pedestal_base = np.array([node['x'], node['y'], 0]) # Pedestals start at z=0
+                pedestal_base_z = node['z'] - fp["PEDESTAL_HEIGHT"]
+                pedestal_base = np.array([node['x'], node['y'], pedestal_base_z])
                 verts, i, j, k = compute_square_pedestal_mesh(pedestal_base, fp["PEDESTAL_HEIGHT"], fp["PEDESTAL_WIDTH"])
                 add_mesh_to_fig(fig, verts, i, j, k, FOUNDATION_COLOR)
 
     # --- 5. Finalize Layout and Legend ---
+    # Restore cross section legend traces
     for cs_id in cs_ids:
-        fig.add_trace(go.Scatter3d(x=[None], y=[None], z=[None], mode="markers",
+        fig.add_trace(go.Scatter3d(
+            x=[None], y=[None], z=[None], mode="markers",
             marker=dict(symbol="square", size=10, color=color_map[cs_id]),
-            name=cs_labels[cs_id], showlegend=True))
-            
+            name=cs_labels[cs_id], showlegend=True
+        ))
     fig.update_layout(
         scene=dict(
             aspectmode='data', xaxis_visible=False, yaxis_visible=False, zaxis_visible=False,

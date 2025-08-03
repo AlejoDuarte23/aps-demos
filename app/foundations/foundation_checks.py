@@ -36,12 +36,11 @@ class FootingGeometry(BaseModel):
     M: float = Field(0.0, description="Bending moment about centre, kN·m")
 
 class FootingSoilData(BaseModel):
-    """Soil values – read them from §7 + §8 of the report."""
     model_config = ConfigDict(extra="forbid")
-    q_allow: float = Field(..., description="Allowable bearing at Df, kPa  (table 8‑1)")
+    q_allow: float = Field(..., description="Allowable bearing at Df, kPa")
     gamma: float = Field(..., description="Unit weight γ, kN/m³  (§7)")
-    phi: float = Field(..., description="Friction angle φ°,  (§7)")
-    c: float = Field(..., description="Cohesion c, kPa  (§7)")
+    phi: float = Field(..., description="Friction angle φ°")
+    c: float = Field(..., description="Cohesion c, kPa")
     E: float = Field(..., description="Elastic modulus, MPa  (§7)")
 
 

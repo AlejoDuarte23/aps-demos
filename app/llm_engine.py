@@ -23,6 +23,9 @@ from app.plots.caisson import group_caisson_locations, plot_3d_with_caissons
 from app.geometry.utils import get_nodes_lines
 from app.opensees.model import Model, calculate_displacements, calcualte_reactions
 from app.plots.model_defo import plot_deformed_mesh
+
+from app.foundations.foundation_checks import FootingSoilData
+
 logger = logging.getLogger(__name__)
 load_dotenv()
 client = instructor.from_openai(OpenAI())
