@@ -170,7 +170,7 @@ class Controller(vkt.Controller):
                 )
 
                 if response:
-                    llm_message, fig = execute_tool(response)
+                    llm_message, fig = execute_tool(response, conversation=conversation_history)
                     if fig:
                         print("Storing fig")
                         store_scene(fig)

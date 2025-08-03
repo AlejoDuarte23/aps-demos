@@ -30,19 +30,32 @@ class FootingGeometry(BaseModel):
     model_config = ConfigDict(extra="forbid")
     B: float = Field(..., gt=0, description="Footing width = length, m")
     Df: float = Field(..., ge=0, description="Embedment depth to base, m")
+
+class Loads(BaseModel):
     P: float = Field(..., description="Axial load, kN (compression +)")
     Vx: float = Field(0.0, description="Shear in local‑x, kN")
     Vy: float = Field(0.0, description="Shear in local‑y, kN")
     M: float = Field(0.0, description="Bending moment about centre, kN·m")
 
+
+class FootingBearingEntry(BaseModel):
+    Df: float = Field(..., description="Embedment depth to base, m get this value from the context can't be None")
+    B: float = Field(..., description="Slab width, m get this value from the context can't be None ")
+    q_allow: float = Field(..., description="Allowable bearing pressure, kPa get this value from the context can't be None")
+
+
 class FootingSoilData(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    q_allow: float = Field(..., description="Allowable bearing at Df, kPa")
-    gamma: float = Field(..., description="Unit weight γ, kN/m³  (§7)")
-    phi: float = Field(..., description="Friction angle φ°")
-    c: float = Field(..., description="Cohesion c, kPa")
-    E: float = Field(..., description="Elastic modulus, MPa  (§7)")
+    bearing_table: list[FootingBearingEntry] = Field(..., description="Parse the bearing pressure table and use it for the footing design. the table has allowable bearing pressure for combinations of Df (embedment) and B (square footing slabs base)")
+    gamma: float = Field(..., description="Unit weight γ, kN/m³ for Footing design")
+    # phi: float = Field(..., description="Friction angle φ° for Footing design")
+    # c: float = Field(..., description="Cohesion c, kPa for Footing design")
+    # E: float = Field(..., description="Elastic modulus, MPa for Footing design")
 
+class DesignFooting(BaseModel):
+    """Combines geometry, loads, and soil data for a footing design."""
+    geometry: FootingGeometry
+    soil: FootingSoilData
 
 def check_shallow_footing(geo: FootingGeometry, soil: FootingSoilData) -> Dict[str, float]:
     """Return safety factors against bearing and eccentricity for a square footing.
@@ -167,10 +180,13 @@ FOUNDATION_CHECKERS = {
     "monopile": (MonopileGeometry, MonopileSoilData, check_monopile),
 }
 
+
+
+
 if __name__ == "__main__":
     # Tiny demo / self‑test
     foot_geo = FootingGeometry(B=4, Df=3, P=3000, M=2500)
-    foot_soil = FootingSoilData(q_allow=350, gamma=19, phi=34, c=0, E=30)
+    foot_soil = FootingSoilData(bearing_table=[FootingBearingEntry(Df=3, B=4, q_allow=350)], gamma=19, phi=34, c=0, E=30)
     print(check_shallow_footing(foot_geo, foot_soil))
 
     pile_geo = PileCapGeometry(pile_diameter=0.4, pile_length=22, cap_width=2.5, P=3000)

@@ -238,7 +238,7 @@ class PlotFootingModel(BaseModel):
     PEDESTAL_HEIGHT: float = Field(..., description="Height of the pedestals from the slab.")
     SLAB_THICK: float = Field(..., description="Thickness of the footing slab.")
     BASE_WIDTH: float = Field(..., description="Total width of the square foundation slab base.")
-    CLUSTER_TOL: float = Field(default=3.0, description="Tolerance for grouping support nodes.")
+    CLUSTER_TOL: float = Field(default=3.0, description="Tolerance for grouping support nodes. default 6")
 
 class CrossSectionInfo(BaseModel):
     name: str

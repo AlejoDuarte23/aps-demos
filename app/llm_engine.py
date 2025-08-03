@@ -18,13 +18,13 @@ from textwrap import dedent
 from app.types import MembersDict, CrossSectionInfo, NodesDict
 from app.plots.model_viz import plot_3d_model
 from app.plots.piles import plot_3d_with_foundations, collect_support_nodes, group_four_pile_sets
-from app.plots.footings import plot_structure_with_footing, group_four_pedestal_sets, collect_support_nodes as collect_footnng_support_nodes
+from app.foundations.footings.plots_footings import plot_structure_with_footing, group_four_pedestal_sets, collect_support_nodes as collect_footnng_support_nodes
 from app.plots.caisson import group_caisson_locations, plot_3d_with_caissons
 from app.geometry.utils import get_nodes_lines
 from app.opensees.model import Model, calculate_displacements, calcualte_reactions
 from app.plots.model_defo import plot_deformed_mesh
 
-from app.foundations.foundation_checks import FootingSoilData
+from app.foundations.footings.footings import DesignFooting
 
 logger = logging.getLogger(__name__)
 load_dotenv()
@@ -47,13 +47,6 @@ class PlotModelWithPiles(BaseModel):
     CAP_THICK: float = Field(..., description="Pile Cap thickness")
     EDGE_COVER: float = Field(..., description="distance between the piles and the cap edge")
     CLUSTER_TOL: float = Field(..., description="Cluter Tolerance default 3m")
-
-class PlotFootingModel(BaseModel):
-    PEDESTAL_WIDTH: float = Field(..., description="Width of the square pedestals.")
-    PEDESTAL_HEIGHT: float = Field(..., description="Height of the pedestals from the slab.")
-    SLAB_THICK: float = Field(..., description="Thickness of the footing slab.")
-    BASE_WIDTH: float = Field(..., description="Total width of the square foundation slab base.")
-    CLUSTER_TOL: float = Field(default=3.0, description="Tolerance for grouping support nodes.")
 
 class PlotModelWithCaisson(BaseModel):
     """Pydantic model defining the parameters for a caisson foundation."""
@@ -82,7 +75,7 @@ def convert_cs_to_m(cs_dict: dict[int, CrossSectionInfo])-> dict[int, CrossSecti
 
 class Response(BaseModel):
     response: str = Field(..., description="Be conversational firendly and Format the response always nicely")
-    selected_tool: Union[None , PlotModel, PlotModelWithPiles ,PlotFootingModel, PlotModelWithCaisson, RunModel | Upload2Acc] = Field(..., description="Select any of these tools, Use any of   ")
+    selected_tool: Union[None , PlotModel, PlotModelWithPiles, PlotModelWithCaisson, RunModel, Upload2Acc, DesignFooting] = Field(..., description="Select any of these tools, Use any of ")
 
 
 def llm_response(conversation_history: list[dict],
@@ -107,10 +100,10 @@ def llm_response(conversation_history: list[dict],
         logger.debug("Request messages:\n%s", pprint.pformat(messages))
     
     resp_chunks = client.chat.completions.create_partial(
-        model="gpt-4.1",
+        model="gpt-4o",
         messages=messages,
         response_model=Response,
-        temperature=0.3,
+        temperature=0.5,
     )
 
     resp_final = None
@@ -142,7 +135,7 @@ def get_model():
         members[line_id] = {"line_id":line_id, "cross_section_id":1, "material_name": "Steel"}
     return nodes, lines, members, cs_dict
 
-def execute_tool(response: Response) -> tuple[str, go.Figure | None]:
+def execute_tool(response: Response, conversation: list[dict] | None = None) -> tuple[str, go.Figure | None]:
     """Exectue the tools based on the user query and file_content. Generates a text response
     or a Plotly view."""
     print(f"[Debug] {response}")
@@ -163,14 +156,34 @@ def execute_tool(response: Response) -> tuple[str, go.Figure | None]:
         fig = plot_3d_with_foundations(nodes=nodes, lines=lines, members=members,cross_sections=cs_dict, caps=caps, foundation_params=foundation_params_dict)
         return response.response, fig
             
-    if isinstance(response.selected_tool, PlotFootingModel):
+    if isinstance(response.selected_tool, DesignFooting):
         nodes, lines, members, cs_dict = get_model()
-        cs_dict_m = convert_cs_to_m(cs_dict=cs_dict)
-        footing_params_dict = response.selected_tool.model_dump()
+
+        nodes_m = convert_model_to_mm(nodes)
+        my_model = Model(
+            nodes=nodes_m, lines=lines, cross_sections=cs_dict, members=members,
+        )
+        my_model.create_model()
+        my_model.run_model()
+        reactions = calcualte_reactions(nodes=nodes)
+        from app.foundations.footings.footings import find_optimal_footing_geometry
+        footing_geometry, cost, soil_pressure = find_optimal_footing_geometry(response.selected_tool.soil)
+        if not footing_geometry:
+            raise ValueError("Optimization Fail")
+        footing_params_dict = footing_geometry.model_dump()
         support_nodes = collect_footnng_support_nodes(nodes)
         footings = group_four_pedestal_sets(support_nodes, cluster_tol=footing_params_dict['CLUSTER_TOL'])
+        cs_dict_m = convert_cs_to_m(cs_dict=cs_dict)
 
-        fig = plot_structure_with_footing(nodes=nodes, lines=lines, members=members, cross_sections=cs_dict, footings=footings, footing_params=footing_params_dict)
+        fig = plot_structure_with_footing(nodes=nodes, lines=lines, members=members, cross_sections=cs_dict_m, footings=footings, footing_params=footing_params_dict)
+
+        if conversation:
+            conversation.append({"role":"assistant","content":response.response})
+            conversation.append({"role":"user", "content": f" The tool generate the following results: Optiomal geometry {footing_geometry}, construction cost:{cost}, acting soil pressure: {soil_pressure} let the user knwo The foundation model will be render in the RHS view"})
+            new_response = llm_response(conversation_history=conversation)
+            if new_response:
+                return new_response.response, fig
+        
         return response.response, fig
 
     if isinstance(response.selected_tool, PlotModelWithCaisson):
