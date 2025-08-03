@@ -15,13 +15,13 @@ from openai.types.chat import ParsedChatCompletion
 from typing import Union
 from textwrap import dedent
 
-from app.types import MembersDict, CrossSectionInfo
+from app.types import MembersDict, CrossSectionInfo, NodesDict
 from app.plots.model_viz import plot_3d_model
 from app.plots.piles import plot_3d_with_foundations, collect_support_nodes, group_four_pile_sets
 from app.plots.footings import plot_structure_with_footing, group_four_pedestal_sets, collect_support_nodes as collect_footnng_support_nodes
 from app.plots.caisson import group_caisson_locations, plot_3d_with_caissons
 from app.geometry.utils import get_nodes_lines
-from app.opensees.model import Model, calculate_displacements
+from app.opensees.model import Model, calculate_displacements, calcualte_reactions
 from app.plots.model_defo import plot_deformed_mesh
 logger = logging.getLogger(__name__)
 load_dotenv()
@@ -49,7 +49,7 @@ class PlotFootingModel(BaseModel):
     PEDESTAL_WIDTH: float = Field(..., description="Width of the square pedestals.")
     PEDESTAL_HEIGHT: float = Field(..., description="Height of the pedestals from the slab.")
     SLAB_THICK: float = Field(..., description="Thickness of the footing slab.")
-    EDGE_COVER: float = Field(..., description="Distance from outer pedestals to the slab edge.")
+    BASE_WIDTH: float = Field(..., description="Total width of the square foundation slab base.")
     CLUSTER_TOL: float = Field(default=3.0, description="Tolerance for grouping support nodes.")
 
 class PlotModelWithCaisson(BaseModel):
@@ -60,13 +60,22 @@ class PlotModelWithCaisson(BaseModel):
     CLUSTER_TOL: float = Field(..., description="Tolerance for grouping support nodes into a single foundation")
 
 
+def convert_model_to_mm(nodes: NodesDict) -> NodesDict:
+    nodes_in_mm: NodesDict = {}
+    # Convert model to mm for opensees
+    for nodes_id, node_vals in nodes.items():
+        nodes_in_mm[nodes_id] = {"id": nodes_id, "x": node_vals["x"]*1000, "y": node_vals["y"]*1000, "z": node_vals["z"]*1000}
+    return nodes_in_mm
+    
 
-# FOUNDATION_PARAMS = {
-#     'PILE_DIAM': 1.0,       # meters
-#     'PILE_LENGTH': 10.0,    # meters
-#     'CAP_THICK': 1.2,       # meters
-#     'EDGE_COVER': 0.4,      # meters
-#     'CLUSTER_TOL': 3.0      # meters}
+def convert_cs_to_m(cs_dict: dict[int, CrossSectionInfo])-> dict[int, CrossSectionInfo]:
+    cs_dict_m: dict[int, CrossSectionInfo] = {}
+    # Convert cross sections to m
+    for cs_dict_key, info in cs_dict.items():
+        info["b"] = info["b"]/1000
+        info["h"] = info["h"]/1000
+        cs_dict_m[cs_dict_key] = info
+    return cs_dict_m
 
 class Response(BaseModel):
     response: str = Field(..., description="Be conversational firendly and Format the response always nicely")
@@ -114,16 +123,15 @@ def get_model():
     raw = vkt.Storage().get("ifc_model", scope="entity").getvalue()
     nodes, lines = get_nodes_lines(file=raw)
 
-
     my_cs = CrossSectionInfo(
-        name = "L70x4",
-        id = 1,
-        A=100,
-        Iz=10000000000000000000,
-        Iy=10000000000000000000,
-        Jxx=20000000,
-        b=0.070,
-        h=0.070
+        name="L3-1/2x3-1/2x1/4",
+        id=1,
+        A=1096.8,           # mm^2
+        Iz=1308881.8,       # mm^4
+        Iy=340048.0,        # mm^4
+        Jxx=16066.5,        # mm^4 (torsion constant)
+        b=88.9,             # mm width
+        h=88.9              # mm depth
     )
     members: MembersDict = {}
     cs_dict = {1 : my_cs}
@@ -137,12 +145,14 @@ def execute_tool(response: Response) -> tuple[str, go.Figure | None]:
     print(f"[Debug] {response}")
     if isinstance(response.selected_tool, PlotModel):
         nodes, lines, members, cs_dict = get_model()
-        fig = plot_3d_model(nodes, lines, members, cs_dict)
+        cs_dict_m = convert_cs_to_m(cs_dict=cs_dict)
+        fig = plot_3d_model(nodes, lines, members, cs_dict_m)
         # print(fig)
         return response.response, fig
     
     if isinstance(response.selected_tool, PlotModelWithPiles):
         nodes, lines, members, cs_dict = get_model()
+        cs_dict_m = convert_cs_to_m(cs_dict=cs_dict)
         foundation_params_dict = response.selected_tool.model_dump()
         support_nodes = collect_support_nodes(nodes)
         caps = group_four_pile_sets(support_nodes, cluster_tol=foundation_params_dict['CLUSTER_TOL'])
@@ -152,6 +162,7 @@ def execute_tool(response: Response) -> tuple[str, go.Figure | None]:
             
     if isinstance(response.selected_tool, PlotFootingModel):
         nodes, lines, members, cs_dict = get_model()
+        cs_dict_m = convert_cs_to_m(cs_dict=cs_dict)
         footing_params_dict = response.selected_tool.model_dump()
         support_nodes = collect_footnng_support_nodes(nodes)
         footings = group_four_pedestal_sets(support_nodes, cluster_tol=footing_params_dict['CLUSTER_TOL'])
@@ -161,6 +172,7 @@ def execute_tool(response: Response) -> tuple[str, go.Figure | None]:
 
     if isinstance(response.selected_tool, PlotModelWithCaisson):
         nodes, lines, members, cs_dict = get_model()
+        cs_dict_m = convert_cs_to_m(cs_dict=cs_dict)
         footing_params_dict = response.selected_tool.model_dump()
         support_nodes = collect_support_nodes(nodes)
         caisson_locations = group_caisson_locations(
@@ -179,15 +191,24 @@ def execute_tool(response: Response) -> tuple[str, go.Figure | None]:
     
     if isinstance(response.selected_tool, RunModel):
         nodes, lines, members, cs_dict = get_model()
+
+        nodes_m = convert_model_to_mm(nodes)
         my_model = Model(
-            nodes=nodes, lines=lines, cross_sections=cs_dict, members=members,
+            nodes=nodes_m, lines=lines, cross_sections=cs_dict, members=members,
         )
         my_model.create_model()
         my_model.run_model()
-        
+        reactions = calcualte_reactions(nodes=nodes)
+        print(f"[DEBUG] {reactions=}")
         disp_dict = calculate_displacements(lines=lines, nodes=nodes)
-        
-        fig = plot_deformed_mesh(disp_dict=disp_dict, members=members, cross_sections= cs_dict, nodes=nodes, lines=lines)
+        # Convert displacements back from mm to m! (models are in m)
+        disp_dict_m: dict[int, float] = {}
+        for node_id, defo in disp_dict.items():
+            print(defo)
+            disp_dict_m[node_id] = defo/1000
+
+        cs_dict_m = convert_cs_to_m(cs_dict=cs_dict)
+        fig = plot_deformed_mesh(disp_dict=disp_dict_m, members=members, cross_sections= cs_dict_m, nodes=nodes, lines=lines)
         return response.response, fig
     
     if isinstance(response.selected_tool, Upload2Acc):

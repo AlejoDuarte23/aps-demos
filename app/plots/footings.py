@@ -187,16 +187,16 @@ def plot_structure_with_footing(
             xs = [n['x'] for n in pedestal_nodes]
             ys = [n['y'] for n in pedestal_nodes]
             center_x, center_y = sum(xs) / 4.0, sum(ys) / 4.0
-            
-            # Calculate slab dimensions
-            slab_width = (max(xs) - min(xs)) + 2 * fp["EDGE_COVER"]
-            slab_depth = (max(ys) - min(ys)) + 2 * fp["EDGE_COVER"]
+
+            # Use BASE_WIDTH for slab dimensions
+            slab_width = fp["BASE_WIDTH"]
+            slab_depth = fp["BASE_WIDTH"]
             z_base = -fp["SLAB_THICK"]
 
             # Draw the footing slab
             slab_center = np.array([center_x, center_y, z_base + fp["SLAB_THICK"] / 2.0])
             add_box_mesh(fig, slab_center, slab_width, slab_depth, fp["SLAB_THICK"], FOUNDATION_COLOR)
-            
+
             # Draw the individual pedestals on top of the slab
             for node in pedestal_nodes:
                 pedestal_base = np.array([node['x'], node['y'], 0]) # Pedestals start at z=0
@@ -226,7 +226,7 @@ class PlotFootingModel(BaseModel):
     PEDESTAL_WIDTH: float = Field(..., description="Width of the square pedestals.")
     PEDESTAL_HEIGHT: float = Field(..., description="Height of the pedestals from the slab.")
     SLAB_THICK: float = Field(..., description="Thickness of the footing slab.")
-    EDGE_COVER: float = Field(..., description="Distance from outer pedestals to the slab edge.")
+    BASE_WIDTH: float = Field(..., description="Total width of the square foundation slab base.")
     CLUSTER_TOL: float = Field(default=3.0, description="Tolerance for grouping support nodes.")
 
 class CrossSectionInfo(BaseModel):
@@ -268,7 +268,7 @@ class CrossSectionInfo(BaseModel):
     #     PEDESTAL_WIDTH=0.6,
     #     PEDESTAL_HEIGHT=2,
     #     SLAB_THICK=0.8,
-    #     EDGE_COVER=0.5,
+    #     BASE_WIDTH=1.5,  # Total width of the slab base
     #     CLUSTER_TOL=6.0  # Increased to capture the 5x5 base
     # )
     # footing_params_dict = footing_params_model.model_dump()

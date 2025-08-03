@@ -56,7 +56,7 @@ def plot_deformed_mesh(
     members: dict[int, dict],
     cross_sections: dict[int, dict],
     disp_dict: dict[int, float],
-    scale: float = 25,
+    scale: float =50,
 ) -> go.Figure:
     """Return a Plotly figure of the scaled deformed shape with meshed elements."""
 

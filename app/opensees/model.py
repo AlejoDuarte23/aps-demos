@@ -73,7 +73,7 @@ class Model:
     def assign_support(self)->None:
         ground_nodes = get_nodes_by_z(self.nodes, z=0)
         for node_tag in ground_nodes:
-            ops.fix(node_tag, 1,1,1,1,1,1)
+            ops.fix(node_tag, 1,1,1,0,0,0)
 
     def create_beam_elements(
         self,
@@ -232,5 +232,15 @@ def calculate_displacements(lines:LinesDict, nodes:NodesDict):
     
     return disp_dict
 
+
+
+def calcualte_reactions(nodes:NodesDict) -> dict[int, float]:
+    # disp_by_type: DefaultDict[str, list[float]] = defaultdict(list)
+    axial_reaction: dict[int, float] = {}
+    ops.reactions()
+    for support in get_nodes_by_z(nodes, z=0):
+        reactions = ops.nodeReaction(support)
+        axial_reaction[support] = reactions[2]
+    return axial_reaction
 
 
