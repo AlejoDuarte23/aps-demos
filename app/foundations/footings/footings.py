@@ -37,9 +37,9 @@ class DesignFooting(BaseModel):
 #     BASE_WIDTH: float = Field(..., description="Total width of the square foundation slab base.")
 #     CLUSTER_TOL: float = Field(default=3.0, description="Tolerance for grouping support nodes.")
 
-CONCRETE_COST = 30 #M2
-COMPACTED_FILL_COST = 15 #M2
-EXCAVATION_COST = 20#M2
+CONCRETE_COST = 300 #M3
+COMPACTED_FILL_COST = 90 #M3
+EXCAVATION_COST = 20#M3
 
 def calculate_cost(geometry: FootingGeometry) -> float:
     pedestal_volume = geometry.PEDESTAL_WIDTH * geometry.PEDESTAL_WIDTH * geometry.PEDESTAL_HEIGHT
@@ -81,7 +81,7 @@ def max_bearing_pressure(P: float, M: float, B: float) -> float | None:
 
 
 
-def find_optimal_footing_geometry(soil: FootingSoilData):
+def find_optimal_footing_geometry(soil: FootingSoilData, reactions: dict[int, dict[str, float]]):
     """
     Enumerate candidate geometries and return the cheapest one whose
     maximum bearing pressure does not exceed the allowable value.
@@ -95,9 +95,12 @@ def find_optimal_footing_geometry(soil: FootingSoilData):
     slab_thicknesses = [0.40, 0.45, 0.50, 0.60]    # [m]
 
     # design actions – replace by real loads in production
-    P_service = 100.0    # [kN]
-    M_service = 10.0     # [kN·m]
-
+    P_service = max([abs(vals["P"]) for vals in reactions.values()])
+    Mx = max([abs(vals["Mx"]) for vals in reactions.values()])
+    My = max([abs(vals["My"]) for vals in reactions.values()])
+    M_service = max([Mx, My])
+    print(f"{P_service=}")
+    print(f"{M_service=}")
     for entry in soil.bearing_table:
         for pw in pedestal_widths:
             for st in slab_thicknesses:
@@ -113,7 +116,22 @@ def find_optimal_footing_geometry(soil: FootingSoilData):
                     CLUSTER_TOL=3.0
                 )
 
-                q_max = max_bearing_pressure(P_service, M_service, geom.BASE_WIDTH)
+                # Calculate self-weight of concrete and fill
+                pedestal_volume = geom.PEDESTAL_WIDTH * geom.PEDESTAL_WIDTH * geom.PEDESTAL_HEIGHT * 4
+                slab_volume = geom.BASE_WIDTH * geom.BASE_WIDTH * geom.SLAB_THICK
+                fill_volume = geom.PEDESTAL_HEIGHT * (
+                    geom.BASE_WIDTH * geom.BASE_WIDTH - 4 * (geom.PEDESTAL_WIDTH * geom.PEDESTAL_WIDTH)
+                )
+                gamma_concrete = 24  # kN/m3 typical
+                gamma_fill = soil.gamma  # kN/m3 from soil data
+
+                self_weight_concrete = (pedestal_volume + slab_volume) * gamma_concrete
+                self_weight_fill = fill_volume * gamma_fill
+
+                P_total = P_service + self_weight_concrete + self_weight_fill
+
+                q_max = max_bearing_pressure(P_total, M_service, geom.BASE_WIDTH)
+                print(f"{q_max=}")
                 if q_max is None or q_max > entry.qadm:
                     continue
 

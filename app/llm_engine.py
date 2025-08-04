@@ -52,12 +52,6 @@ class GetInputsForFoundationDesign(BaseModel):
 
 class GetGeotechnicalReport(BaseModel):
     file_name: str = Field(..., description=" name of teh Geotechnical Report default:GEO001 - GEOTECHNICAL DATA SUMMARY REV0.pdf ")
-# class PlotModelWithPiles(BaseModel):
-#     PILE_DIAM: float = Field(..., description="Pile diameter")
-#     PILE_LENGTH: float = Field(..., description="Pile length")
-#     CAP_THICK: float = Field(..., description="Pile Cap thickness")
-#     EDGE_COVER: float = Field(..., description="distance between the piles and the cap edge")
-#     CLUSTER_TOL: float = Field(..., description="Cluter Tolerance default 3m")
 
 class DisplayLoads(BaseModel):
     critical_load_case: str = Field(..., description="use this model to plot the model with critical loads from the critical load cases, the system will show it autmatically.")
@@ -167,10 +161,11 @@ def execute_tool(response: Response, conversation: list[dict] | None = None) -> 
     
     if isinstance(response.selected_tool, DesignPiles):
         nodes, lines, members, cs_dict = get_model()
-
+        raw = vkt.Storage().get("ifc_model", scope="entity").getvalue()
+        loads_dict = read_nodal_loads(raw)
         nodes_m = convert_model_to_mm(nodes)
         my_model = Model(
-            nodes=nodes_m, lines=lines, cross_sections=cs_dict, members=members,
+            nodes=nodes_m, lines=lines, cross_sections=cs_dict, members=members,nodal_loads=loads_dict
         )
         my_model.create_model()
         my_model.run_model()
@@ -213,14 +208,18 @@ def execute_tool(response: Response, conversation: list[dict] | None = None) -> 
         nodes, lines, members, cs_dict = get_model()
 
         nodes_m = convert_model_to_mm(nodes)
+        raw = vkt.Storage().get("ifc_model", scope="entity").getvalue()
+        loads_dict = read_nodal_loads(raw)
         my_model = Model(
-            nodes=nodes_m, lines=lines, cross_sections=cs_dict, members=members,
+            nodes=nodes_m, lines=lines, cross_sections=cs_dict, members=members, nodal_loads=loads_dict
         )
         my_model.create_model()
         my_model.run_model()
         reactions = calculate_reactions(nodes=nodes)
+        center_loads = calculate_center_loads_foundation(reactions=reactions, nodes=nodes)
+        print(center_loads)
         from app.foundations.footings.footings import find_optimal_footing_geometry
-        footing_geometry, cost, soil_pressure = find_optimal_footing_geometry(response.selected_tool.soil)
+        footing_geometry, cost, soil_pressure = find_optimal_footing_geometry(response.selected_tool.soil, center_loads)
         if not footing_geometry:
             raise ValueError("Optimization Fail")
         footing_params_dict = footing_geometry.model_dump()

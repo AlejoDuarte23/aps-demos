@@ -25,8 +25,8 @@ class DesignPiles(BaseModel):
 
 FS_AXIAL = 2.5
 FS_LATERAL = 2.0
-CONCRETE_COST = 30.0       # currency per m³
-EXCAVATION_COST = 20.0     # currency per m³
+CONCRETE_COST = 300     # currency per m³
+EXCAVATION_COST = 3450    # currency per m³
 
 def axial_capacity(D: float, L: float, soil: PileSoilData) -> tuple[float, float]:
     As = pi * D * L                   # shaft surface, m²
@@ -66,7 +66,7 @@ def find_optimal_pile(soil: PileSoilData) -> tuple[ModelWithPiles, float, float,
             Qult_comp, Qult_ten = axial_capacity(D, L, soil)
             Qallow_comp = Qult_comp / FS_AXIAL
             Qallow_ten = Qult_ten / FS_AXIAL
-
+ 
             print(f"[DEBUG] D={D}, L={L}, Qult_comp={Qult_comp}, Qult_ten={Qult_ten}, Qallow_comp={Qallow_comp}, Qallow_ten={Qallow_ten}")
 
             if P_comp > Qallow_comp:
@@ -88,7 +88,7 @@ def find_optimal_pile(soil: PileSoilData) -> tuple[ModelWithPiles, float, float,
 
             if best is None or cost < best[1]:
                 best = (
-                    ModelWithPiles(PILE_DIAM=D, PILE_LENGTH=L,EDGE_COVER=max([1.3*D, D + 150]), CAP_THICK=0.9*D, CLUSTER_TOL=3),
+                    ModelWithPiles(PILE_DIAM=D, PILE_LENGTH=L,EDGE_COVER=max([1.3*D, D + 0.150]), CAP_THICK=0.9*D, CLUSTER_TOL=3),
                     cost,
                     Hallow,
                     Qallow_comp,
