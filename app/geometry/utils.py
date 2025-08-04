@@ -140,3 +140,73 @@ def read_nodal_loads(file: str, load_case_name: str = "Tw") -> dict[int, dict[st
         }
 
     return loads
+
+
+def collect_support_nodes(nodes, z_tol=1e-6) -> NodesDict:
+    support_nodes = {n['id']: n for n in nodes.values() if abs(n['z']) < z_tol}
+    return support_nodes
+
+CLUSTER_TOL = 3
+def group_four_pile_sets(
+    supports: NodesDict, 
+    cluster_tol: float = CLUSTER_TOL
+) -> dict[int, list[dict]]:
+    remaining_supports, caps, cap_id = list(supports.values()), {}, 1
+    while remaining_supports:
+        seed = remaining_supports.pop(0)
+        current_cluster = [seed]
+        other_supports = list(remaining_supports)
+        for support in other_supports:
+            dist = math.sqrt((support['x'] - seed['x'])**2 + (support['y'] - seed['y'])**2)
+            if dist < cluster_tol:
+                current_cluster.append(support)
+                remaining_supports.remove(support)
+        if len(current_cluster) == 4:
+            caps[cap_id] = current_cluster
+            cap_id += 1
+        else:
+            print(f"Discarding a cluster with {len(current_cluster)} nodes: {[n['id'] for n in current_cluster]}")
+    if not caps: print("Could not find any valid 4-pile groups.")
+    else: print(f"Successfully identified {len(caps)} pile cap groups.")
+    return caps
+
+
+def calculate_center_loads_foundation(reactions: dict[int, float], nodes: NodesDict):
+    """
+    For each pile cap group (set of 4 supports), calculate:
+      - Total vertical load (P)
+      - Moment about x (Mx) and y (My) at the centroid
+    Returns: dict[cap_id, dict[str, float]]
+    """
+    support_nodes = collect_support_nodes(nodes=nodes)
+    support_sets = group_four_pile_sets(supports=support_nodes, cluster_tol=3)
+
+    cap_loads = {}
+    for cap_id, pile_nodes in support_sets.items():
+        cx = sum(n['x'] for n in pile_nodes) / 4.0
+        cy = sum(n['y'] for n in pile_nodes) / 4.0
+
+        P = 0.0
+        Mx = 0.0
+        My = 0.0
+
+        for n in pile_nodes:
+            node_id = n['id']
+            reaction = reactions.get(node_id, 0.0)/1000
+            dx = n['x'] - cx
+            dy = n['y'] - cy
+            # Moment about x-axis: force * y-distance
+            Mx += reaction * dy
+            # Moment about y-axis: force * x-distance
+            My += reaction * dx
+            # Total vertical load
+            P += reaction
+
+        cap_loads[cap_id] = {"P": round(P,3), "Mx": round(Mx,3), "My": round(My,3), "node_ids": [n['id'] for n in pile_nodes]}
+    import pprint
+    pprint.pp(cap_loads)
+    return cap_loads
+
+
+
+

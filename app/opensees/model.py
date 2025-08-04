@@ -244,6 +244,6 @@ def calculate_reactions(nodes: NodesDict) -> dict[int, float]:
     ops.reactions()
     for support in get_nodes_by_z(nodes, z=0):
         reactions = ops.nodeReaction(support)
-        axial_reaction[support] = reactions[2]
+        axial_reaction[support] = round(reactions[2],3)
     return axial_reaction
 

@@ -27,7 +27,7 @@ from app.plots.model_defo import plot_deformed_mesh
 from app.foundations.footings.footings import DesignFooting
 from app.foundations.piles.piles import ModelWithPiles, DesignPiles 
 
-from app.geometry.utils import read_nodal_loads
+from app.geometry.utils import read_nodal_loads, calculate_center_loads_foundation
 from app.plots.model_with_loads import plot_3d_model_with_loads
 
 logger = logging.getLogger(__name__)
@@ -246,6 +246,7 @@ def execute_tool(response: Response, conversation: list[dict] | None = None) -> 
         my_model.run_model()
         reactions = calculate_reactions(nodes=nodes)
         print(f"[DEBUG] {reactions=}")
+        center_loads = calculate_center_loads_foundation(reactions=reactions, nodes=nodes)
         disp_dict = calculate_displacements(lines=lines, nodes=nodes)
         # Convert displacements back from mm to m! (models are in m)
         disp_dict_m: dict[int, dict[str, float]] = {}
@@ -254,6 +255,12 @@ def execute_tool(response: Response, conversation: list[dict] | None = None) -> 
             disp_dict_m[node_id] = {"x": defo["x"]/1000, "y": defo["y"]/1000, "z": defo["z"]/1000} 
         cs_dict_m = convert_cs_to_m(cs_dict=cs_dict)
         fig = plot_deformed_mesh(disp_dict=disp_dict_m, members=members, cross_sections= cs_dict_m, nodes=nodes, lines=lines)
+        if conversation:
+            conversation.append({"role":"assistant","content":response.response})
+            conversation.append({"role":"user", "content": f" The tool generate the following results: Reaction loads [kN] {reactions}, Design load at the center of each foundation kN and kN*m:{center_loads}, deformed shape of the model will be displayed in the RHS of the app"})
+            new_response = llm_response(conversation_history=conversation)
+            if new_response:
+                return new_response.response, fig
         return response.response, fig
     
     if isinstance(response.selected_tool, DisplayLoads):

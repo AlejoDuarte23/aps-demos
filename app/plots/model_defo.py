@@ -165,6 +165,38 @@ def plot_deformed_mesh(
         )
     )
 
+    # label nodes where z == 0 (with tolerance)
+    tol = 1e-6
+    zero_z_nids = [nid for nid, n in def_nodes.items() if abs(n["z"]) < tol]
+    if zero_z_nids:
+        # first draw a halo by duplicating text in white, slightly larger
+        fig.add_trace(
+            go.Scatter3d(
+                x=[def_nodes[nid]["x"] for nid in zero_z_nids],
+                y=[def_nodes[nid]["y"] for nid in zero_z_nids],
+                z=[def_nodes[nid]["z"] - 0.01 for nid in zero_z_nids],  # shift down in z
+                mode="text",
+                text=[str(nid) for nid in zero_z_nids],
+                textposition="bottom center",
+                showlegend=False,
+                hoverinfo="skip",
+                textfont=dict(size=11, color="white"),
+            )
+        )
+        # then the main label in dark gray
+        fig.add_trace(
+            go.Scatter3d(
+                x=[def_nodes[nid]["x"] for nid in zero_z_nids],
+                y=[def_nodes[nid]["y"] for nid in zero_z_nids],
+                z=[def_nodes[nid]["z"] - 0.005 for nid in zero_z_nids],  # slight offset
+                mode="text",
+                text=[str(nid) for nid in zero_z_nids],
+                textposition="bottom center",
+                showlegend=False,
+                hoverinfo="skip",
+                textfont=dict(size=11, color="rgb(80,80,80)"),
+            )
+        )
     # colour‑bar
     fig.add_trace(
         go.Scatter3d(

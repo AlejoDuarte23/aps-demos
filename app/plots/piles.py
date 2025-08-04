@@ -442,7 +442,10 @@ def collect_support_nodes(nodes, z_tol=1e-6):
     support_nodes = {n['id']: n for n in nodes.values() if abs(n['z']) < z_tol}
     return support_nodes
 
-def group_four_pile_sets(supports, cluster_tol=CLUSTER_TOL):
+def group_four_pile_sets(
+    supports: dict[int, dict], 
+    cluster_tol: float = CLUSTER_TOL
+) -> dict[int, list[dict]]:
     remaining_supports, caps, cap_id = list(supports.values()), {}, 1
     while remaining_supports:
         seed = remaining_supports.pop(0)
@@ -462,6 +465,9 @@ def group_four_pile_sets(supports, cluster_tol=CLUSTER_TOL):
     else: print(f"Successfully identified {len(caps)} pile cap groups.")
     return caps
 
+
+def calculate_moments(reactions):
+    ...
 
 # if __name__ == "__main__":
 
