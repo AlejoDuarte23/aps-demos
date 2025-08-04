@@ -173,7 +173,7 @@ def execute_tool(response: Response, conversation: list[dict] | None = None) -> 
 
         if conversation:
             conversation.append({"role":"assistant","content":response.response})
-            conversation.append({"role":"user", "content": f" The tool generate the following results: Optimal geometry {pile_geometry}, construction cost:{cost}, lateral strength: {h_strenght}, comprresion streghnt {compression_strenght} and tension strength {tension_strenght}  with a safety factor of 2 and 2.5 respectively. let the user knwo The foundation model will be render in the RHS view"})
+            conversation.append({"role":"user", "content": f" The tool generate the following results: Optimal geometry {pile_geometry}, construction cost:#${cost} usd, lateral strength: {h_strenght} kN, comprresion streghnt {compression_strenght} kpa and tension strength {tension_strenght}kpa  with a safety factor of 2 and 2.5 respectively. let the user knwo The foundation model will be render in the RHS view"})
             new_response = llm_response(conversation_history=conversation)
             if new_response:
                 return new_response.response, fig

@@ -88,7 +88,7 @@ def find_optimal_pile(soil: PileSoilData) -> tuple[ModelWithPiles, float, float,
 
             if best is None or cost < best[1]:
                 best = (
-                    ModelWithPiles(PILE_DIAM=D, PILE_LENGTH=L,EDGE_COVER=min([0.3*D, 150]), CAP_THICK=0.9*D, CLUSTER_TOL=3),
+                    ModelWithPiles(PILE_DIAM=D, PILE_LENGTH=L,EDGE_COVER=max([1.3*D, D + 150]), CAP_THICK=0.9*D, CLUSTER_TOL=3),
                     cost,
                     Hallow,
                     Qallow_comp,
