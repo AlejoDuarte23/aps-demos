@@ -270,6 +270,12 @@ def execute_tool(response: Response, conversation: list[dict] | None = None) -> 
         raw = vkt.Storage().get("ifc_model", scope="entity").getvalue()
         loads_dict = read_nodal_loads(raw)
         fig = plot_3d_model_with_loads(nodes,lines,members, cs_dict, loads_dict)
+        if conversation:
+            conversation.append({"role":"assistant","content":response.response})
+            conversation.append({"role":"user", "content": f" The tool generate the following results: loads nodes id and magnitud [kN] {loads_dict}, tell user  wind loads are not shown and this loads belong to the critical load for foundation design (wire loads + Wind), loads will be render in the RRHS of the view. list the loads in bullet points  for the user but do not make a markdown table"})
+            new_response = llm_response(conversation_history=conversation)
+            if new_response:
+                return new_response.response, fig
         # fig = plot_3d_model(nodes, lines, members, cs_dict_m)
         # print(fig)
         return response.response, fig

@@ -315,6 +315,33 @@ def plot_3d_model_with_loads(
                 i=cyi, j=cyj, k=cyk, color="red", opacity=1.0, hoverinfo="skip", showlegend=False
             ))
 
+    load_nids = [
+        nid for nid, info in loads_dict.items()
+        if nid in nodes and any(abs(info.get(k, 0.0)) > 0 for k in ("Fx", "Fy", "Fz"))
+    ]
+    if load_nids:
+        # prepare label positions slightly above the node in z
+        offset = max_range * 0.02  # adjust based on model size
+        xs = [nodes[nid]["x"] for nid in load_nids]
+        ys = [nodes[nid]["y"] for nid in load_nids]
+        zs = [nodes[nid]["z"] + offset for nid in load_nids]
+        texts = [str(nid) for nid in load_nids]
+
+        # main label (dark gray)
+        fig.add_trace(
+            go.Scatter3d(
+                x=xs,
+                y=ys,
+                z=[z - offset * 0.3 for z in zs],  # slight inward shift so halo shows
+                mode="text",
+                text=texts,
+                textposition="top center",
+                showlegend=False,
+                hoverinfo="skip",
+                textfont=dict(size=12, color="rgb(60,60,60)"),
+            )
+        )
+
     # --- Add legend for cross-sections ---
     for cs_id in cs_ids:
         fig.add_trace(
