@@ -1,3 +1,4 @@
+from math import sqrt
 import openseespy.opensees as ops
 from app.types import (
     Vec3,
@@ -22,7 +23,7 @@ class Model:
         lines: LinesDict,
         cross_sections: CrossSectionsDict,
         members: MembersDict,
-        nodesWithLoad: Annotated[list[int] | None, "Joist Nodes"] = None,
+        nodal_loads: dict[int, dict[str, float]] | None = None,
         nodalLoadMagnitud: Annotated[float | None, "Load to be applied in Newton per Node"] = None
     ) -> None:
         self.nodes = nodes
@@ -33,8 +34,7 @@ class Model:
         self.mass: MassDict = {}
         self.g = 10000 #9800
         self.loadsDict: DefaultDict[int, float] = defaultdict(float)
-        self.nodesWithLoad = nodesWithLoad
-        self.nodalLoadMagnitud = nodalLoadMagnitud
+        self.nodal_loads: dict[int, dict[str, float]] | None = nodal_loads
 
     def create_nodes(self) -> None:
         for n in self.nodes.values():
@@ -158,16 +158,24 @@ class Model:
     
     def create_loads(self):
         """Create self weight load and point loads"""
-        for notetag, mass_values in self.mass.items():
+        for nodetag, mass_values in self.mass.items():
             # Mass in opensees is N/g * g to loads
-            self.loadsDict[notetag] += mass_values["mass_z"]*self.g
+            self.loadsDict[nodetag] += mass_values["mass_z"]*self.g
 
-        if self.nodesWithLoad and self.nodalLoadMagnitud:
-            for nodetag in self.nodesWithLoad:
-                self.loadsDict[nodetag] += self.nodalLoadMagnitud
-            
-        for nodetag, loadMag in self.loadsDict.items():    
-            ops.load(nodetag, 0, 0, -loadMag, 0, 0, 0)
+        for nodetag, loadMag in self.loadsDict.items():
+            if self.nodal_loads and nodetag in self.nodal_loads:
+                load_vals = self.nodal_loads[nodetag]
+                ops.load(
+                    nodetag,
+                    load_vals["Fx"]*1000,# N
+                    load_vals["Fy"]*1000,# N
+                    load_vals["Fz"]*1000 -loadMag,# N
+                    load_vals["Mx"]*1000*1000,#kN*m
+                    load_vals["My"]*1000*1000,#kN*m
+                    load_vals["Mz"]*1000*1000,#kN*m
+                )
+            else:
+                ops.load(nodetag, 0, 0, -loadMag, 0, 0, 0)
 
 
     def create_model(self):
@@ -212,35 +220,30 @@ class Model:
 
 def calculate_displacements(lines:LinesDict, nodes:NodesDict):
     # disp_by_type: DefaultDict[str, list[float]] = defaultdict(list)
-    disp_dict: dict[int, float] = {}
-    for lineargs in lines.values():
-        for node in (lineargs["Ni"], lineargs["Nj"]):
-            disp = ops.nodeDisp(node)
-            disp_z = disp[2]
-            # disp_by_type[lineargs["Type"]].append(disp_z)
+    disp_dict: dict[int, dict[str, float]] = {}
+    # for lineargs in lines.values():
+    #     for node in (lineargs["Ni"], lineargs["Nj"]):
+    #         disp = ops.nodeDisp(node)
+    #         disp_z = disp[2]
+    #         # disp_by_type[lineargs["Type"]].append(disp_z)
 
-            if node not in disp_dict:
-                disp_dict[node] = disp_z
+    #         if node not in disp_dict:
+    #             disp_dict[node] = disp_z
                         
     # max_disp_by_type = {eletype: min(disp_list) for eletype, disp_list in  disp_by_type.items()}   
 
     for node in nodes:
         disp = ops.nodeDisp(node)
-        disp_z = disp[2]
-        disp_dict[node] = disp_z
-
-    
+        disp_dict[node] = {"x":disp[0], "y":disp[1], "z":disp[2]}
     return disp_dict
 
 
 
-def calcualte_reactions(nodes:NodesDict) -> dict[int, float]:
-    # disp_by_type: DefaultDict[str, list[float]] = defaultdict(list)
+def calculate_reactions(nodes: NodesDict) -> dict[int, float]:
     axial_reaction: dict[int, float] = {}
     ops.reactions()
     for support in get_nodes_by_z(nodes, z=0):
         reactions = ops.nodeReaction(support)
         axial_reaction[support] = reactions[2]
     return axial_reaction
-
 

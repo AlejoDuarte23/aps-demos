@@ -21,11 +21,14 @@ from app.plots.piles import plot_3d_with_foundations, collect_support_nodes, gro
 from app.foundations.footings.plots_footings import plot_structure_with_footing, group_four_pedestal_sets, collect_support_nodes as collect_footnng_support_nodes
 from app.plots.caisson import group_caisson_locations, plot_3d_with_caissons
 from app.geometry.utils import get_nodes_lines
-from app.opensees.model import Model, calculate_displacements, calcualte_reactions
+from app.opensees.model import Model, calculate_displacements, calculate_reactions
 from app.plots.model_defo import plot_deformed_mesh
 
 from app.foundations.footings.footings import DesignFooting
 from app.foundations.piles.piles import ModelWithPiles, DesignPiles 
+
+from app.geometry.utils import read_nodal_loads
+from app.plots.model_with_loads import plot_3d_model_with_loads
 
 logger = logging.getLogger(__name__)
 load_dotenv()
@@ -49,7 +52,10 @@ class Upload2Acc(BaseModel):
 #     EDGE_COVER: float = Field(..., description="distance between the piles and the cap edge")
 #     CLUSTER_TOL: float = Field(..., description="Cluter Tolerance default 3m")
 
-
+class DisplayLoads(BaseModel):
+    critical_load_case: str = Field(..., description="use this model to plot the model with critical loads from the critical load cases, the system will show it autmatically.")
+    pass 
+ 
 class PlotModelWithCaisson(BaseModel):
     """Pydantic model defining the parameters for a caisson foundation."""
     CAISSON_WIDTH: float = Field(..., description="Caisson width (along the X-axis)")
@@ -77,7 +83,7 @@ def convert_cs_to_m(cs_dict: dict[int, CrossSectionInfo])-> dict[int, CrossSecti
 
 class Response(BaseModel):
     response: str = Field(..., description="Be conversational firendly and Format the response always nicely")
-    selected_tool: Union[None , PlotModel, DesignPiles, PlotModelWithCaisson, RunModel, Upload2Acc, DesignFooting] = Field(..., description="Select any of these tools, Use any of ")
+    selected_tool: Union[None , PlotModel, DesignPiles, RunModel, Upload2Acc, DesignFooting, DisplayLoads] = Field(..., description="Select any of these tools. ")
 
 
 def llm_response(conversation_history: list[dict],
@@ -93,6 +99,7 @@ def llm_response(conversation_history: list[dict],
             from Autodesk Construcction Cloud (ACC) using the VITKOR - APS Integration.
 
             Use AnalyzeModel to Analyze the model do not confuse that with 
+            User PlotModelWithLoads to plot the model with loads
             """
         )
     }
@@ -102,7 +109,7 @@ def llm_response(conversation_history: list[dict],
         logger.debug("Request messages:\n%s", pprint.pformat(messages))
     
     resp_chunks = client.chat.completions.create_partial(
-        model="gpt-4o",
+        model="gpt-4.1",
         messages=messages,
         response_model=Response,
         temperature=0.5,
@@ -157,7 +164,7 @@ def execute_tool(response: Response, conversation: list[dict] | None = None) -> 
         )
         my_model.create_model()
         my_model.run_model()
-        reactions = calcualte_reactions(nodes=nodes)
+        reactions = calculate_reactions(nodes=nodes)
 
         
         from app.foundations.piles.piles import find_optimal_pile
@@ -187,7 +194,7 @@ def execute_tool(response: Response, conversation: list[dict] | None = None) -> 
         )
         my_model.create_model()
         my_model.run_model()
-        reactions = calcualte_reactions(nodes=nodes)
+        reactions = calculate_reactions(nodes=nodes)
         from app.foundations.footings.footings import find_optimal_footing_geometry
         footing_geometry, cost, soil_pressure = find_optimal_footing_geometry(response.selected_tool.soil)
         if not footing_geometry:
@@ -229,26 +236,36 @@ def execute_tool(response: Response, conversation: list[dict] | None = None) -> 
     
     if isinstance(response.selected_tool, RunModel):
         nodes, lines, members, cs_dict = get_model()
-
+        raw = vkt.Storage().get("ifc_model", scope="entity").getvalue()
+        loads_dict = read_nodal_loads(raw)
         nodes_m = convert_model_to_mm(nodes)
         my_model = Model(
-            nodes=nodes_m, lines=lines, cross_sections=cs_dict, members=members,
+            nodes=nodes_m, lines=lines, cross_sections=cs_dict, members=members, nodal_loads=loads_dict
         )
         my_model.create_model()
         my_model.run_model()
-        reactions = calcualte_reactions(nodes=nodes)
+        reactions = calculate_reactions(nodes=nodes)
         print(f"[DEBUG] {reactions=}")
         disp_dict = calculate_displacements(lines=lines, nodes=nodes)
         # Convert displacements back from mm to m! (models are in m)
-        disp_dict_m: dict[int, float] = {}
+        disp_dict_m: dict[int, dict[str, float]] = {}
         for node_id, defo in disp_dict.items():
-            print(defo)
-            disp_dict_m[node_id] = defo/1000
-
+            # print(defo)
+            disp_dict_m[node_id] = {"x": defo["x"]/1000, "y": defo["y"]/1000, "z": defo["z"]/1000} 
         cs_dict_m = convert_cs_to_m(cs_dict=cs_dict)
         fig = plot_deformed_mesh(disp_dict=disp_dict_m, members=members, cross_sections= cs_dict_m, nodes=nodes, lines=lines)
         return response.response, fig
     
+    if isinstance(response.selected_tool, DisplayLoads):
+        nodes, lines, members, cs_dict = get_model()
+        cs_dict_m = convert_cs_to_m(cs_dict=cs_dict)
+        
+        raw = vkt.Storage().get("ifc_model", scope="entity").getvalue()
+        loads_dict = read_nodal_loads(raw)
+        fig = plot_3d_model_with_loads(nodes,lines,members, cs_dict, loads_dict)
+        # fig = plot_3d_model(nodes, lines, members, cs_dict_m)
+        # print(fig)
+        return response.response, fig
     if isinstance(response.selected_tool, Upload2Acc):
 
         """Upload an IFC file to ACC in the folder selected in the UI."""

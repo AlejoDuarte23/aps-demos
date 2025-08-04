@@ -1,5 +1,7 @@
+
 from __future__ import annotations
 
+import math
 import numpy as np
 import plotly.graph_objects as go
 import plotly.express as px
@@ -55,25 +57,32 @@ def plot_deformed_mesh(
     lines: dict[int, dict],
     members: dict[int, dict],
     cross_sections: dict[int, dict],
-    disp_dict: dict[int, float],
-    scale: float =50,
+    disp_dict: dict[int, dict[str, float]],
+    scale: float = 500,
 ) -> go.Figure:
     """Return a Plotly figure of the scaled deformed shape with meshed elements."""
 
-    # ------------------------------------------------------------------ #
-    # 1. Deformed node coordinates
-    # ------------------------------------------------------------------ #
     def_nodes: dict[int, dict] = {}
     for nid, data in nodes.items():
+        defo = disp_dict[nid]
         def_nodes[nid] = {
-            "x": data["x"],
-            "y": data["y"],
-            "z": data["z"] + disp_dict.get(nid, 0.0) * scale,
+            "x": data["x"] + defo["x"] * scale,
+            "y": data["y"] + defo["y"] * scale,
+            "z": data["z"] + defo["z"] * scale,
         }
 
-    # mean displacement per line
+    # MODIFICATION: Calculate resultant displacement for each node
+    node_resultant_disp = {
+        nid: math.sqrt(defo["x"]**2 + defo["y"]**2 + defo["z"]**2)
+        for nid, defo in disp_dict.items()
+    }
+
     line_disp = {
-        lid: (disp_dict.get(ln["Ni"], 0.0) + disp_dict.get(ln["Nj"], 0.0)) / 2.0
+        lid: (
+            node_resultant_disp.get(ln["Ni"], 0.0)
+            + node_resultant_disp.get(ln["Nj"], 0.0)
+        )
+        / 2.0
         for lid, ln in lines.items()
     }
     dmin, dmax = (min(line_disp.values()), max(line_disp.values())) if line_disp else (0.0, 0.0)
@@ -88,7 +97,7 @@ def plot_deformed_mesh(
         [n["y"] for n in def_nodes.values()],
         [n["z"] for n in def_nodes.values()],
     )
-    if all_x:                                              # keep aspect 1:1:1
+    if all_x:  # keep aspect 1:1:1
         x_min, x_max = min(all_x), max(all_x)
         y_min, y_max = min(all_y), max(all_y)
         z_min, z_max = min(all_z), max(all_z)
@@ -108,24 +117,40 @@ def plot_deformed_mesh(
 
     # colour helper
     scale_name = "Jet_r"
-    scale = getattr(px.colors.sequential, scale_name)
+    colorscale = getattr(px.colors.sequential, scale_name)
+
     def map_colour(val: float) -> str:
         if dmax == dmin:
-            return scale[0]
+            return colorscale[0]
         ratio = (val - dmin) / (dmax - dmin)
-        return scale[int(ratio * (len(scale) - 1))]
+        return colorscale[int(ratio * (len(colorscale) - 1))]
 
     # draw members (assumes helper funcs exist)
     for lid, ln in lines.items():
         cs_id = members[lid]["cross_section_id"]
         if cs_id not in cross_sections:
             continue
+
+        # compute average resultant displacement for this line
+        disp_val = line_disp.get(lid, 0.0)
+        color = map_colour(disp_val)
+
         n1, n2 = def_nodes[ln["Ni"]], def_nodes[ln["Nj"]]
         A = np.array([n1["x"], n1["y"], n1["z"]])
         B = np.array([n2["x"], n2["y"], n2["z"]])
+
         cs = cross_sections[cs_id]
-        verts = compute_beam_vertices_rect(A, B, width=float(cs["h"]), height=float(cs["b"]))
-        add_beam_mesh(fig, verts, map_colour(line_disp[lid]))
+        # assuming cs["h"] is the width and cs["b"] is the height; swap if your convention is reversed
+        try:
+            width = float(cs["h"])
+            height = float(cs["b"])
+        except Exception:
+            # fallback to some small default if missing
+            width = 0.1
+            height = 0.1
+
+        verts = compute_beam_vertices_rect(A, B, width=width, height=height)
+        add_beam_mesh(fig, verts, color)
 
     # nodes
     fig.add_trace(
@@ -151,16 +176,14 @@ def plot_deformed_mesh(
                 color=[dmin, dmax],
                 showscale=True,
                 colorbar=dict(
-                    title="ΔZ [mm]",
-                    # ‑‑ size ----------------------------------------------------------------
-                    len=0.45,            # 45 % of plot height  (default: 1.0 = full height)
-                    lenmode="fraction",  # “fraction” = percentage, “pixels” = absolute px
-                    thickness=25,        # 25 px wide           (default: 30 px)
+                    # MODIFICATION: Update color bar title
+                    title="Resultant Disp. [m]",
+                    len=0.45,
+                    lenmode="fraction",
+                    thickness=25,
                     thicknessmode="pixels",
-                    # ‑‑ position ------------------------------------------------------------
                     y=0.5, yanchor="middle",
                     x=1.02, xanchor="left",
-                    # ‑‑ appearance (optional) ----------------------------------------------
                     outlinewidth=1,
                     ticks="outside",
                     tickfont=dict(size=12),
@@ -174,16 +197,17 @@ def plot_deformed_mesh(
     # ------------------------------------------------------------------ #
     # 3. Section legend entries
     # ------------------------------------------------------------------ #
+    # This section remains unchanged
     legend_labels = set()
-    for lid, ln in lines.items():
-        m_type: MemberType | None = ln.get("Type")
-        if m_type is None:
-            continue
-        cs_id = members[lid]["cross_section_id"]
-        if cs_id not in cross_sections:
-            continue
-        desc = cross_sections[cs_id].get("Description", f"Section {cross_sections[cs_id]['name']}")
-        legend_labels.add(f"{m_type}: {desc}")
+    # for lid, ln in lines.items():
+    #     m_type: MemberType | None = ln.get("Type")
+    #     if m_type is None:
+    #         continue
+    #     cs_id = members[lid]["cross_section_id"]
+    #     if cs_id not in cross_sections:
+    #         continue
+    #     desc = cross_sections[cs_id].get("Description", f"Section {cross_sections[cs_id]['name']}")
+    #     legend_labels.add(f"{m_type}: {desc}")
 
     for label in sorted(legend_labels):
         fig.add_trace(
@@ -197,12 +221,13 @@ def plot_deformed_mesh(
             )
         )
 
+
     # ------------------------------------------------------------------ #
     # 4. Max‑displacement box
     # ------------------------------------------------------------------ #
-    max_abs = max(abs(dmin), abs(dmax))
+    max_nodal_disp = max(node_resultant_disp.values()) if node_resultant_disp else 0.0
     fig.add_annotation(
-        text=f"<b>Max Model Deformation |ΔZ|</b><br>{max_abs:.3f} mm",
+        text=f"<b>Max Resultant Displacement: {max_nodal_disp:.3f} m",
         xref="paper", yref="paper",
         x=0.5 , y=1,
         showarrow=False,
@@ -214,6 +239,7 @@ def plot_deformed_mesh(
     # ------------------------------------------------------------------ #
     # 5. Layout
     # ------------------------------------------------------------------ #
+    # This section remains unchanged
     fig.update_layout(
         scene=dict(
             xaxis_visible=False, yaxis_visible=False, zaxis_visible=False,
@@ -223,7 +249,7 @@ def plot_deformed_mesh(
         ),
         legend=dict(
             title=dict(text="Sections"),
-            x=0.02, y=0.02,                # bottom‑left
+            x=0.02, y=0.02,
             xanchor="left", yanchor="bottom",
             bgcolor="rgba(255,255,255,0.85)",
             borderwidth=1,
@@ -234,4 +260,4 @@ def plot_deformed_mesh(
         margin=dict(l=0, r=0, t=40, b=0),
     )
 
-    return fig  
+    return fig

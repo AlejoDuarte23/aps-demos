@@ -1,4 +1,4 @@
-
+import math
 import ifcopenshell 
 import matplotlib.pyplot as plt
 from app.types import NodesDict, LinesDict
@@ -88,3 +88,55 @@ def get_nodes_lines(file: str) -> tuple[NodesDict, LinesDict]:
             lines[line_id] = {"id": line_id, "Ni": Ni, "Nj": Nj}
     return nodes, lines
 
+
+
+def read_nodal_loads(file: str, load_case_name: str = "Tw") -> dict[int, dict[str, float]]:
+
+    model = ifcopenshell.file.from_string(file)
+    # map every point connection to its numeric id
+    conn_to_id = {}
+    for conn in model.by_type("IfcStructuralPointConnection"):
+        try:
+            conn_to_id[conn] = int(conn.Name)
+        except Exception:
+            conn_to_id[conn] = int(conn.id())
+
+    # collect all point actions that belong to the load case Tw
+    actions = []
+    for rel in model.by_type("IfcRelAssignsToGroup"):
+        if getattr(rel.RelatingGroup, "Name", "") == load_case_name:
+            actions.extend([obj for obj in rel.RelatedObjects
+                            if obj.is_a("IfcStructuralPointAction")])
+
+    loads = {}
+
+    for act in actions:
+        # --- locate the support node via IfcRelConnectsStructuralActivity ---
+        node_id = None
+        for rel in act.AssignedToStructuralItem or []:
+            item = rel.RelatingElement           # <- THIS is the correct attribute
+            if item in conn_to_id:
+                node_id = conn_to_id[item]
+                break
+        if node_id is None:
+            continue
+
+        applied = act.AppliedLoad
+        if not (applied and applied.is_a("IfcStructuralLoadSingleForce")):
+            continue
+
+        fx, fy, fz = (float(applied.ForceX or 0),
+                      float(applied.ForceY or 0),
+                      float(applied.ForceZ or 0))
+        mx, my, mz = (float(applied.MomentX or 0),
+                      float(applied.MomentY or 0),
+                      float(applied.MomentZ or 0))
+
+        loads[node_id] = {
+            "Fx": fx, "Fy": fy, "Fz": fz,
+            "Mx": mx, "My": my, "Mz": mz,
+            "CSys": act.GlobalOrLocal or "GLOBAL",
+            "Magnitude": math.hypot(fx, fy, fz),
+        }
+
+    return loads
