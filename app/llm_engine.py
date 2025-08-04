@@ -1,4 +1,5 @@
 import os
+import io
 import urllib.parse
 import requests
 import viktor as vkt
@@ -14,6 +15,7 @@ from openai import OpenAI
 from openai.types.chat import ParsedChatCompletion
 from typing import Union
 from textwrap import dedent
+import pdfminer.high_level
 
 from app.types import MembersDict, CrossSectionInfo, NodesDict
 from app.plots.model_viz import plot_3d_model
@@ -44,7 +46,12 @@ class RunModel(BaseModel):
 class Upload2Acc(BaseModel):
     note: str = Field(..., description="Use this tool when the user want to send the updated model to ACC autodesk platrom services")
     pass
-   
+
+class GetInputsForFoundationDesign(BaseModel):
+    desing_type: Union[DesignFooting, DesignPiles] = Field(..., description= "Use this prior desiging the foundation, and ask the user if they are happy with the inputs, and the as to proceeed with  DesignFooting or DesignPiles ")
+
+class GetGeotechnicalReport(BaseModel):
+    file_name: str = Field(..., description=" name of teh Geotechnical Report default:GEO001 - GEOTECHNICAL DATA SUMMARY REV0.pdf ")
 # class PlotModelWithPiles(BaseModel):
 #     PILE_DIAM: float = Field(..., description="Pile diameter")
 #     PILE_LENGTH: float = Field(..., description="Pile length")
@@ -83,7 +90,7 @@ def convert_cs_to_m(cs_dict: dict[int, CrossSectionInfo])-> dict[int, CrossSecti
 
 class Response(BaseModel):
     response: str = Field(..., description="Be conversational firendly and Format the response always nicely")
-    selected_tool: Union[None , PlotModel, DesignPiles, RunModel, Upload2Acc, DesignFooting, DisplayLoads] = Field(..., description="Select any of these tools. ")
+    selected_tool: Union[None , PlotModel, DesignPiles, RunModel, Upload2Acc, DesignFooting, DisplayLoads, GetGeotechnicalReport, GetInputsForFoundationDesign] = Field(..., description="Select any of these tools. ")
 
 
 def llm_response(conversation_history: list[dict],
@@ -100,6 +107,9 @@ def llm_response(conversation_history: list[dict],
 
             Use AnalyzeModel to Analyze the model do not confuse that with 
             User PlotModelWithLoads to plot the model with loads
+            Use GetGeotechnicalReport to get Geotechnical report
+
+            GetInputsForFoundationDesign use it to get the geotecnical parameters and ask the user if they want to proceed with the desing:
             """
         )
     }
@@ -109,7 +119,7 @@ def llm_response(conversation_history: list[dict],
         logger.debug("Request messages:\n%s", pprint.pformat(messages))
     
     resp_chunks = client.chat.completions.create_partial(
-        model="gpt-4.1",
+        model="gpt-4o",
         messages=messages,
         response_model=Response,
         temperature=0.5,
@@ -166,6 +176,7 @@ def execute_tool(response: Response, conversation: list[dict] | None = None) -> 
         my_model.run_model()
         reactions = calculate_reactions(nodes=nodes)
 
+
         
         from app.foundations.piles.piles import find_optimal_pile
         pile_geometry, cost, h_strenght, compression_strenght, tension_strenght  = find_optimal_pile(response.selected_tool.soil)
@@ -184,7 +195,20 @@ def execute_tool(response: Response, conversation: list[dict] | None = None) -> 
             new_response = llm_response(conversation_history=conversation)
             if new_response:
                 return new_response.response, fig
-            
+
+    if isinstance(response.selected_tool, GetInputsForFoundationDesign):
+        raw: bytes = vkt.Storage().get("geotechnical_report", scope="entity").getvalue_binary()
+        pdf_stream = io.BytesIO(raw)
+        text = pdfminer.high_level.extract_text(pdf_stream)
+
+        if conversation:
+            conversation.append({"role":"assistant","content":response.response})
+            conversation.append({"role":"user", "content": f" Base on the text get the require soil parameters to design the foundation: {text}. tell the user the inputs to be used and if he want to proceed to DESIGN the foundation with parameters, Do not make markdown tables!"})
+            new_response = llm_response(conversation_history=conversation)
+            if new_response:
+                return new_response.response, None
+        return new_response, None
+    
     if isinstance(response.selected_tool, DesignFooting):
         nodes, lines, members, cs_dict = get_model()
 
@@ -208,7 +232,7 @@ def execute_tool(response: Response, conversation: list[dict] | None = None) -> 
 
         if conversation:
             conversation.append({"role":"assistant","content":response.response})
-            conversation.append({"role":"user", "content": f" The tool generate the following results: Optiomal geometry {footing_geometry}, construction cost:{cost}, acting soil pressure: {soil_pressure} let the user knwo The foundation model will be render in the RHS view"})
+            conversation.append({"role":"user", "content": f" The tool generate the following results: Optiomal geometry {footing_geometry}, construction cost: USD{cost}, acting soil pressure: {soil_pressure} let the user knwo The foundation model will be render in the RHS view"})
             new_response = llm_response(conversation_history=conversation)
             if new_response:
                 return new_response.response, fig
@@ -279,6 +303,45 @@ def execute_tool(response: Response, conversation: list[dict] | None = None) -> 
         # fig = plot_3d_model(nodes, lines, members, cs_dict_m)
         # print(fig)
         return response.response, fig
+
+    if isinstance(response.selected_tool, GetGeotechnicalReport):    
+        integration = vkt.external.OAuth2Integration("aps-integration-1")
+        token = integration.get_access_token()
+
+        # file_content = aps_helpers.get_file_content(
+        #     token=token,
+        #     hub_name=params.step1.hubs,
+        #     project_name=params.step1.project,
+        #     subfolder_path=params.step1.subfolder_path,
+        #     file_name=params.step1.files,
+        # )
+
+        # file_content = aps_helpers.get_file_content(
+        #     token=token,
+        #     hub_name= "alejandroduartevendries@gmail.com",
+        #     project_name="Construction : Sample Project - Seaport Civic Center",
+        #     subfolder_path="Project Files/Structural/Geotechnical",
+        #     file_name="GEO001 - GEOTECHNICAL DATA SUMMARY REV0.pdf",
+        # )
+        # print(f"{file_content=}, {type(file_content)=}")
+       
+        # vkt.Storage().set(
+        #     "geotechnical_report",
+        #     data=vkt.File.from_data(file_content),
+        #     scope="entity",
+        # )
+        raw: bytes = vkt.Storage().get("geotechnical_report", scope="entity").getvalue_binary()
+        pdf_stream = io.BytesIO(raw)
+        text = pdfminer.high_level.extract_text(pdf_stream)
+
+        if conversation:
+            conversation.append({"role":"assistant","content":response.response})
+            conversation.append({"role":"user", "content": f" The tool retrieve the following report from the folder: Files/Structural/Geotechnical : {text}. tell the user a succint sumaary of the content, and if he wants to design the foundation of the structural model using this data, you have the data to design piles, footings and monopiles!"})
+            new_response = llm_response(conversation_history=conversation)
+            if new_response:
+                return new_response.response, None
+        return new_response.response, None
+
     if isinstance(response.selected_tool, Upload2Acc):
 
         """Upload an IFC file to ACC in the folder selected in the UI."""
