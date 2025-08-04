@@ -30,6 +30,20 @@ def store_scene(figure: go.Figure, view_name: Literal["view"] = "view") -> None:
         scope="entity",
     )
 
+def get_visibility(params, **kwargs):
+    if not params.step2.chat:
+        entities = vkt.Storage().list(scope="entity")
+        for entity in entities:
+            if entity == "optimization_table":
+                vkt.Storage().delete("optimization_table", scope="entity")
+
+    try:
+        vkt.Storage().get("optimization_table", scope="entity").getvalue()
+        return True
+    except Exception:
+        # If there is no data, then view is hiden.
+        return False
+    
 def get_aps_token():
     integration = vkt.external.OAuth2Integration("aps-integration-1")
     return integration.get_access_token()
@@ -98,7 +112,7 @@ You can then send the updated CAD file back to ACC!
     step1.agent_contenxt = vkt.ActionButton("Get files from  ACC", method="store_file_in_app")
     # step1.upload_file = vkt.ActionButton("Upload File to ACC", method="send_data2acc")
     
-    step2 = vkt.Step("Structural Agent", views=["get_plotly_view"])
+    step2 = vkt.Step("Structural Agent", views=["get_plotly_view","design_results_view"])
     step2.text1 = vkt.Text(dedent(
         """# Structural Agent
 
@@ -174,6 +188,7 @@ class Controller(vkt.Controller):
                     if fig:
                         print("Storing fig")
                         store_scene(fig)
+                        get_visibility(params,**kwargs)
                     return vkt.ChatResult(params.step2.chat, llm_message)
                 else:
                     raise ValueError("The LLM returned no parsed reponse.")
@@ -329,3 +344,25 @@ class Controller(vkt.Controller):
 
         # If you reach here, it was successful.
         print(f"  > SUCCESS! File '{file_name}' is now visible in ACC.")
+
+
+    @vkt.TableView("Results", visible=get_visibility)
+    def design_results_view(self, params, **kwargs):
+        get_visibility(params, **kwargs)
+        try:
+            # 1. Get the pre-formatted table data from storage
+            raw_table_data = (
+                vkt.Storage().get("optimization_table", scope="entity").getvalue()
+            )
+            table = json.loads(raw_table_data)
+
+        except (FileNotFoundError, TypeError):
+            # If no data is stored, show an empty table
+            return vkt.TableResult(
+                data=[], column_headers=["No results generated yet."]
+            )
+
+        # 2. Pass the headers and data directly to the result
+        return vkt.TableResult(
+            data=table.get("data", []), column_headers=table.get("headers", [])
+        )

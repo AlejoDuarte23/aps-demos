@@ -27,7 +27,7 @@ from app.opensees.model import Model, calculate_displacements, calculate_reactio
 from app.plots.model_defo import plot_deformed_mesh
 
 from app.foundations.footings.footings import DesignFooting
-from app.foundations.piles.piles import ModelWithPiles, DesignPiles 
+from app.foundations.piles.piles import ModelWithPiles, DesignPiles, store_pile_iterations_as_table
 
 from app.geometry.utils import read_nodal_loads, calculate_center_loads_foundation
 from app.plots.model_with_loads import plot_3d_model_with_loads
@@ -37,7 +37,7 @@ load_dotenv()
 client = instructor.from_openai(OpenAI())
 
 class PlotModel(BaseModel):
-    pass 
+    when_2_use: str = Field(..., description="Use this tool when the user wants to visualz the mode from ACC or the steel elements")
 
 class RunModel(BaseModel):
     why: str = Field(..., description="Use this tool to analyse or run the model")
@@ -47,8 +47,8 @@ class Upload2Acc(BaseModel):
     note: str = Field(..., description="Use this tool when the user want to send the updated model to ACC autodesk platrom services")
     pass
 
-class GetInputsForFoundationDesign(BaseModel):
-    desing_type: Union[DesignFooting, DesignPiles] = Field(..., description= "Use this prior desiging the foundation, and ask the user if they are happy with the inputs, and the as to proceeed with  DesignFooting or DesignPiles ")
+class GetGeotechnicalInputsForFoundationDesign(BaseModel):
+    desing_type: Union[DesignFooting, DesignPiles] = Field(..., description= "Use this to get geotechnical inputs for Foundation design of piles or footings. this is used Prior! desiging the foundation, and ask the user if they are happy with the inputs, and the as to proceeed with  DesignFooting or DesignPiles ")
 
 class GetGeotechnicalReport(BaseModel):
     file_name: str = Field(..., description=" name of teh Geotechnical Report default:GEO001 - GEOTECHNICAL DATA SUMMARY REV0.pdf ")
@@ -84,7 +84,7 @@ def convert_cs_to_m(cs_dict: dict[int, CrossSectionInfo])-> dict[int, CrossSecti
 
 class Response(BaseModel):
     response: str = Field(..., description="Be conversational firendly and Format the response always nicely")
-    selected_tool: Union[None , PlotModel, DesignPiles, RunModel, Upload2Acc, DesignFooting, DisplayLoads, GetGeotechnicalReport, GetInputsForFoundationDesign] = Field(..., description="Select any of these tools. ")
+    selected_tool: Union[None , PlotModel, DesignPiles, RunModel, Upload2Acc, DesignFooting, DisplayLoads, GetGeotechnicalReport, GetGeotechnicalInputsForFoundationDesign] = Field(..., description="Select any of these tools. ")
 
 
 def llm_response(conversation_history: list[dict],
@@ -103,7 +103,8 @@ def llm_response(conversation_history: list[dict],
             User PlotModelWithLoads to plot the model with loads
             Use GetGeotechnicalReport to get Geotechnical report
 
-            GetInputsForFoundationDesign use it to get the geotecnical parameters and ask the user if they want to proceed with the desing:
+            GetGeotechnicalInputsForFoundationDesign use it to get the geotecnical parameters and ask the user if they want to proceed with the desing:
+            GetGeotechnicalInputsForFoundationDesign use it to get the geotecnical parameters and ask the user if they want to proceed with the desing:
             """
         )
     }
@@ -116,7 +117,7 @@ def llm_response(conversation_history: list[dict],
         model="gpt-4o",
         messages=messages,
         response_model=Response,
-        temperature=0.5,
+        temperature=0.4,
     )
 
     resp_final = None
@@ -174,7 +175,9 @@ def execute_tool(response: Response, conversation: list[dict] | None = None) -> 
 
         
         from app.foundations.piles.piles import find_optimal_pile
-        pile_geometry, cost, h_strenght, compression_strenght, tension_strenght  = find_optimal_pile(response.selected_tool.soil)
+        best, iterations = find_optimal_pile(response.selected_tool.soil)
+        store_pile_iterations_as_table(pile_iterations=iterations)
+        pile_geometry, cost, h_strenght, compression_strenght, tension_strenght = best
         if not pile_geometry:
             raise ValueError("Optimization Fail")
         pile_params_dict = pile_geometry.model_dump()
@@ -191,7 +194,7 @@ def execute_tool(response: Response, conversation: list[dict] | None = None) -> 
             if new_response:
                 return new_response.response, fig
 
-    if isinstance(response.selected_tool, GetInputsForFoundationDesign):
+    if isinstance(response.selected_tool, GetGeotechnicalInputsForFoundationDesign):
         raw: bytes = vkt.Storage().get("geotechnical_report", scope="entity").getvalue_binary()
         pdf_stream = io.BytesIO(raw)
         text = pdfminer.high_level.extract_text(pdf_stream)
