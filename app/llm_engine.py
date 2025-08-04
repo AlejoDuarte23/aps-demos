@@ -25,6 +25,7 @@ from app.opensees.model import Model, calculate_displacements, calcualte_reactio
 from app.plots.model_defo import plot_deformed_mesh
 
 from app.foundations.footings.footings import DesignFooting
+from app.foundations.piles.piles import ModelWithPiles, DesignPiles 
 
 logger = logging.getLogger(__name__)
 load_dotenv()
@@ -41,12 +42,13 @@ class Upload2Acc(BaseModel):
     note: str = Field(..., description="Use this tool when the user want to send the updated model to ACC autodesk platrom services")
     pass
    
-class PlotModelWithPiles(BaseModel):
-    PILE_DIAM: float = Field(..., description="Pile diameter")
-    PILE_LENGTH: float = Field(..., description="Pile length")
-    CAP_THICK: float = Field(..., description="Pile Cap thickness")
-    EDGE_COVER: float = Field(..., description="distance between the piles and the cap edge")
-    CLUSTER_TOL: float = Field(..., description="Cluter Tolerance default 3m")
+# class PlotModelWithPiles(BaseModel):
+#     PILE_DIAM: float = Field(..., description="Pile diameter")
+#     PILE_LENGTH: float = Field(..., description="Pile length")
+#     CAP_THICK: float = Field(..., description="Pile Cap thickness")
+#     EDGE_COVER: float = Field(..., description="distance between the piles and the cap edge")
+#     CLUSTER_TOL: float = Field(..., description="Cluter Tolerance default 3m")
+
 
 class PlotModelWithCaisson(BaseModel):
     """Pydantic model defining the parameters for a caisson foundation."""
@@ -75,7 +77,7 @@ def convert_cs_to_m(cs_dict: dict[int, CrossSectionInfo])-> dict[int, CrossSecti
 
 class Response(BaseModel):
     response: str = Field(..., description="Be conversational firendly and Format the response always nicely")
-    selected_tool: Union[None , PlotModel, PlotModelWithPiles, PlotModelWithCaisson, RunModel, Upload2Acc, DesignFooting] = Field(..., description="Select any of these tools, Use any of ")
+    selected_tool: Union[None , PlotModel, DesignPiles, PlotModelWithCaisson, RunModel, Upload2Acc, DesignFooting] = Field(..., description="Select any of these tools, Use any of ")
 
 
 def llm_response(conversation_history: list[dict],
@@ -146,15 +148,35 @@ def execute_tool(response: Response, conversation: list[dict] | None = None) -> 
         # print(fig)
         return response.response, fig
     
-    if isinstance(response.selected_tool, PlotModelWithPiles):
+    if isinstance(response.selected_tool, DesignPiles):
         nodes, lines, members, cs_dict = get_model()
-        cs_dict_m = convert_cs_to_m(cs_dict=cs_dict)
-        foundation_params_dict = response.selected_tool.model_dump()
-        support_nodes = collect_support_nodes(nodes)
-        caps = group_four_pile_sets(support_nodes, cluster_tol=foundation_params_dict['CLUSTER_TOL'])
 
-        fig = plot_3d_with_foundations(nodes=nodes, lines=lines, members=members,cross_sections=cs_dict, caps=caps, foundation_params=foundation_params_dict)
-        return response.response, fig
+        nodes_m = convert_model_to_mm(nodes)
+        my_model = Model(
+            nodes=nodes_m, lines=lines, cross_sections=cs_dict, members=members,
+        )
+        my_model.create_model()
+        my_model.run_model()
+        reactions = calcualte_reactions(nodes=nodes)
+
+        
+        from app.foundations.piles.piles import find_optimal_pile
+        pile_geometry, cost, h_strenght, compression_strenght, tension_strenght  = find_optimal_pile(response.selected_tool.soil)
+        if not pile_geometry:
+            raise ValueError("Optimization Fail")
+        pile_params_dict = pile_geometry.model_dump()
+        support_nodes = collect_support_nodes(nodes)
+        caps = group_four_pile_sets(support_nodes, cluster_tol=pile_params_dict['CLUSTER_TOL'])
+        cs_dict_m = convert_cs_to_m(cs_dict=cs_dict)
+
+        fig = plot_3d_with_foundations(nodes=nodes, lines=lines, members=members,cross_sections=cs_dict_m, caps=caps, foundation_params=pile_params_dict)
+
+        if conversation:
+            conversation.append({"role":"assistant","content":response.response})
+            conversation.append({"role":"user", "content": f" The tool generate the following results: Optimal geometry {pile_geometry}, construction cost:{cost}, lateral strength: {h_strenght}, comprresion streghnt {compression_strenght} and tension strength {tension_strenght}  with a safety factor of 2 and 2.5 respectively. let the user knwo The foundation model will be render in the RHS view"})
+            new_response = llm_response(conversation_history=conversation)
+            if new_response:
+                return new_response.response, fig
             
     if isinstance(response.selected_tool, DesignFooting):
         nodes, lines, members, cs_dict = get_model()
