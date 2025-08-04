@@ -1,3 +1,4 @@
+import viktor as vkt
 from math import tan, radians, pi
 from typing import Optional, Tuple
 import json
@@ -119,38 +120,44 @@ def find_optimal_pile(soil: PileSoilData) -> tuple[
 
 def store_pile_iterations_as_table(pile_iterations: list[dict]):
     """
-    Converts a list of pile iteration dicts into a styled table structure and stores it as JSON in vkt.Storage.
+    Converts a list of pile iteration dicts into a plain table structure
+    and stores it as JSON in vkt.Storage.
     Storage key: "piles_iteration"
     """
-    import viktor as vkt
-    from viktor import TableCell, Color
+
 
     if not pile_iterations:
-        table_structure = {"headers": [], "data": []}
+        table_structure = {"headers": [], "data": [], "flags": []}
     else:
         headers = [
-            "Diameter (m)", "Length (m)", "Excavation Cost", "Concrete Cost",
-            "Total Cost"
+            "Diameter (m)",
+            "Length (m)",
+            "Excavation Cost",
+            "Concrete Cost",
+            "Total Cost",
         ]
         data = []
+        flags = []
         for it in pile_iterations:
-            compliant = it.get("Compliant")
-            style = {
-                "background_color": Color.green() if compliant else Color.red(),
-                "text_style": "bold"
-            }
-            row = [
-                TableCell(it.get("Diameter"), **style),
-                TableCell(it.get("Length"), **style),
-                TableCell(f"${it.get('ExcavationCost', 0):,.2f}", **style),
-                TableCell(f"${it.get('ConcreteCost', 0):,.2f}", **style),
-                TableCell(f"${it.get('TotalCost', 0):,.2f}", **style),
-            ]
-            data.append(row)
-        table_structure = {"headers": headers, "data": data}
+            data.append([
+                it.get("Diameter"),
+                it.get("Length"),
+                f"${it.get('ExcavationCost', 0):,.2f}",
+                f"${it.get('ConcreteCost', 0):,.2f}",
+                f"${it.get('TotalCost', 0):,.2f}",
+            ])
+            flags.append(bool(it.get("Compliant")))
+
+        table_structure = {
+            "headers": headers,
+            "data": data,
+            "flags": flags,
+        }
 
     vkt.Storage().set(
-        "piles_iteration",
-        data=vkt.File.from_data(json.dumps(table_structure, default=str).encode()),
+        "optimization_table",
+        data=vkt.File.from_data(
+            json.dumps(table_structure).encode("utf-8")
+        ),
         scope="entity",
     )

@@ -26,9 +26,7 @@ class FootingSoilData(BaseModel):
     c: float = Field(..., description="Cohesion c, kPa for Footing design")
     E: float = Field(..., description="Elastic modulus, MPa for Footing design")
 
-class DesignFooting(BaseModel):
-    # geometry: FootingGeometry
-    soil: FootingSoilData = Field(..., description="Extract the soil information from the context, the inner system will take care of getting the optimal footing dimension and the applied load, focus on getting the allowable bearing table correclty!")
+
 
 # class PlotFootingModel(BaseModel):
 #     PEDESTAL_WIDTH: float = Field(..., description="Width of the square pedestals.")
@@ -85,16 +83,16 @@ def find_optimal_footing_geometry(soil: FootingSoilData, reactions: dict[int, di
     """
     Enumerate candidate geometries and return the cheapest one whose
     maximum bearing pressure does not exceed the allowable value.
-    Returns: (optimal_geometry, optimal_cost, acting_soil_pressure)
+    Returns: (optimal_geometry, optimal_cost, acting_soil_pressure, iterations)
     """
     best_geom: FootingGeometry | None = None
     best_cost = float("inf")
     best_q_max = None
+    iterations = []
 
     pedestal_widths = [0.50, 0.60, 0.70, 0.80]     # [m]
     slab_thicknesses = [0.40, 0.45, 0.50, 0.60]    # [m]
 
-    # design actions – replace by real loads in production
     P_service = max([abs(vals["P"]) for vals in reactions.values()])
     Mx = max([abs(vals["Mx"]) for vals in reactions.values()])
     My = max([abs(vals["My"]) for vals in reactions.values()])
@@ -132,13 +130,64 @@ def find_optimal_footing_geometry(soil: FootingSoilData, reactions: dict[int, di
 
                 q_max = max_bearing_pressure(P_total, M_service, geom.BASE_WIDTH)
                 print(f"{q_max=}")
-                if q_max is None or q_max > entry.qadm:
-                    continue
+                compliant = q_max is not None and q_max <= entry.qadm
 
                 cost = calculate_cost(geom)
+                iterations.append({
+                    "PedestalWidth": pw,
+                    "SlabThickness": st,
+                    "BaseWidth": entry.B,
+                    "EmbedmentDepth": entry.Df,
+                    "AllowableBearing": entry.qadm,
+                    "TotalCost": cost,
+                    "Compliant": compliant,
+                })
+
+                if not compliant:
+                    continue
+
                 if cost < best_cost:
                     best_cost = cost
                     best_geom = geom
                     best_q_max = q_max
 
-    return best_geom, best_cost, best_q_max
+    return best_geom, best_cost, best_q_max, iterations
+
+def store_footing_iterations_as_table(footing_iterations: list[dict]):
+    import viktor as vkt
+    import json
+
+    if not footing_iterations:
+        table_structure = {"headers": [], "data": [], "flags": []}
+    else:
+        headers = [
+            "Pedestal Width (m)",
+            "Slab Thickness (m)",
+            "Base Width (m)",
+            "Embedment Depth (m)",
+            "Allowable Bearing (kPa)",
+            "Total Cost",
+        ]
+
+        data = []
+        flags = []
+        for it in footing_iterations:
+            data.append([
+                it["PedestalWidth"],
+                it["SlabThickness"],
+                it["BaseWidth"],
+                it["EmbedmentDepth"],
+                it["AllowableBearing"],
+                f"${it.get('TotalCost', 0):,.2f}",
+            ])
+            flags.append(bool(it.get("Compliant")))
+
+        table_structure = {"headers": headers, "data": data, "flags": flags}
+
+    vkt.Storage().set(
+        "optimization_table",
+        data=vkt.File.from_data(
+            json.dumps(table_structure).encode("utf-8")
+        ),
+        scope="entity",
+    )

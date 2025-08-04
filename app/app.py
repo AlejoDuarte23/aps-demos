@@ -346,23 +346,45 @@ class Controller(vkt.Controller):
         print(f"  > SUCCESS! File '{file_name}' is now visible in ACC.")
 
 
-    @vkt.TableView("Results", visible=get_visibility)
+    @vkt.TableView("Optimization Results", visible=get_visibility)
     def design_results_view(self, params, **kwargs):
         get_visibility(params, **kwargs)
+
         try:
-            # 1. Get the pre-formatted table data from storage
             raw_table_data = (
-                vkt.Storage().get("optimization_table", scope="entity").getvalue()
+                vkt.Storage()
+                   .get("optimization_table", scope="entity")
+                   .getvalue()
             )
             table = json.loads(raw_table_data)
-
         except (FileNotFoundError, TypeError):
-            # If no data is stored, show an empty table
             return vkt.TableResult(
-                data=[], column_headers=["No results generated yet."]
+                data=[],
+                column_headers=["No results generated yet."]
             )
 
-        # 2. Pass the headers and data directly to the result
+        # 1. Extend headers with a Compliant column
+        headers = table["headers"] + ["Compliant"]
+        rows    = table["data"]
+        flags   = table["flags"]
+
+        styled_rows = []
+        for row_vals, ok in zip(rows, flags):
+            # 2. Keep original cells unstyled
+            cells = list(row_vals)
+
+            # 3. Create a styled Compliant cell only
+            flag_text  = "Yes" if ok else "No"
+            flag_style = {
+                "background_color": vkt.Color.green() if ok else vkt.Color.red(),
+                "text_style":      "bold",
+            }
+            cells.append(vkt.TableCell(flag_text, **flag_style))
+
+            styled_rows.append(cells)
+
+        # 4. Return the table: only the Compliant column is colored
         return vkt.TableResult(
-            data=table.get("data", []), column_headers=table.get("headers", [])
+            data=styled_rows,
+            column_headers=headers
         )

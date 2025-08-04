@@ -9,12 +9,13 @@ import instructor
 import plotly.graph_objects as go
 import app.crud.data_management.helpers as aps_helpers
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, BeforeValidator
 from dotenv import load_dotenv
 from openai import OpenAI
 from openai.types.chat import ParsedChatCompletion
-from typing import Union
+from typing import Union, Annotated, Literal
 from textwrap import dedent
+from instructor import llm_validator
 import pdfminer.high_level
 
 from app.types import MembersDict, CrossSectionInfo, NodesDict
@@ -26,7 +27,7 @@ from app.geometry.utils import get_nodes_lines
 from app.opensees.model import Model, calculate_displacements, calculate_reactions
 from app.plots.model_defo import plot_deformed_mesh
 
-from app.foundations.footings.footings import DesignFooting
+from app.foundations.footings.footings import store_footing_iterations_as_table, FootingSoilData
 from app.foundations.piles.piles import ModelWithPiles, DesignPiles, store_pile_iterations_as_table
 
 from app.geometry.utils import read_nodal_loads, calculate_center_loads_foundation
@@ -47,6 +48,10 @@ class Upload2Acc(BaseModel):
     note: str = Field(..., description="Use this tool when the user want to send the updated model to ACC autodesk platrom services")
     pass
 
+class DesignFooting(BaseModel):
+    # geometry: FootingGeometry
+    soil: FootingSoilData = Field(..., description="Extract the soil information from the context, the inner system will take care of getting the optimal footing dimension and the applied load")
+
 class GetGeotechnicalInputsForFoundationDesign(BaseModel):
     desing_type: Union[DesignFooting, DesignPiles] = Field(..., description= "Use this to get geotechnical inputs for Foundation design of piles or footings. this is used Prior! desiging the foundation, and ask the user if they are happy with the inputs, and the as to proceeed with  DesignFooting or DesignPiles ")
 
@@ -63,6 +68,7 @@ class PlotModelWithCaisson(BaseModel):
     CAISSON_DEPTH: float = Field(..., description="Caisson depth (along the Y-axis)")
     CAISSON_THICKNESS: float = Field(..., description="Caisson thickness or height (along the Z-axis)")
     CLUSTER_TOL: float = Field(..., description="Tolerance for grouping support nodes into a single foundation")
+
 
 
 def convert_model_to_mm(nodes: NodesDict) -> NodesDict:
@@ -97,14 +103,7 @@ def llm_response(conversation_history: list[dict],
         "content": dedent(
             """
             You are a helpful assistant with the following context, who formats responses clearly and helps users analyze structures comming
-            from Autodesk Construcction Cloud (ACC) using the VITKOR - APS Integration.
-
-            Use AnalyzeModel to Analyze the model do not confuse that with 
-            User PlotModelWithLoads to plot the model with loads
-            Use GetGeotechnicalReport to get Geotechnical report
-
-            GetGeotechnicalInputsForFoundationDesign use it to get the geotecnical parameters and ask the user if they want to proceed with the desing:
-            GetGeotechnicalInputsForFoundationDesign use it to get the geotecnical parameters and ask the user if they want to proceed with the desing:
+            from Autodesk Construcction Cloud (ACC) using the VITKOR - APS Integration an also optimize and design foundation.
             """
         )
     }
@@ -201,13 +200,29 @@ def execute_tool(response: Response, conversation: list[dict] | None = None) -> 
 
         if conversation:
             conversation.append({"role":"assistant","content":response.response})
-            conversation.append({"role":"user", "content": f" Base on the text get the require soil parameters to design the foundation: {text}. tell the user the inputs to be used and if he want to proceed to DESIGN the foundation with parameters, Do not make markdown tables!"})
+            conversation.append({"role":"user", "content": f" Base on the text get the require soil parameters to design the foundation: {text}. tell the user the inputs to be used and if he want to proceed to DESIGN the foundation with parameters, Do not make markdown tables in chat!."})
             new_response = llm_response(conversation_history=conversation)
             if new_response:
                 return new_response.response, None
         return new_response, None
     
     if isinstance(response.selected_tool, DesignFooting):
+
+        soil = response.selected_tool.soil
+        for entry in response.selected_tool.soil.bearing_table:
+            if not entry.qadm:
+                if conversation:
+                    raw: bytes = vkt.Storage().get("geotechnical_report", scope="entity").getvalue_binary()
+                    pdf_stream = io.BytesIO(raw)
+                    text = pdfminer.high_level.extract_text(pdf_stream)
+                    conversation.append({"role":"assistant","content":str(response.selected_tool)})
+                    conversation.append({"role":"user", "content": f"in your last answer one or more values of qadm were None give the correct bearing table input using the data {text}"})
+                    new_response = llm_response(conversation_history=conversation)
+                    if isinstance(new_response.selected_tool, DesignFooting):
+                        soil = new_response.selected_tool.soil
+                        break
+                    
+        
         nodes, lines, members, cs_dict = get_model()
 
         nodes_m = convert_model_to_mm(nodes)
@@ -222,7 +237,8 @@ def execute_tool(response: Response, conversation: list[dict] | None = None) -> 
         center_loads = calculate_center_loads_foundation(reactions=reactions, nodes=nodes)
         print(center_loads)
         from app.foundations.footings.footings import find_optimal_footing_geometry
-        footing_geometry, cost, soil_pressure = find_optimal_footing_geometry(response.selected_tool.soil, center_loads)
+        footing_geometry, cost, soil_pressure, iterations = find_optimal_footing_geometry(response.selected_tool.soil, center_loads)
+        store_footing_iterations_as_table(footing_iterations=iterations)
         if not footing_geometry:
             raise ValueError("Optimization Fail")
         footing_params_dict = footing_geometry.model_dump()
