@@ -1,3 +1,4 @@
+from app.foundations.footings.footings import FootingSoilData
 from typing import Literal
 from instructor.dsl.partial import PartialLiteralMixin
 from pydantic import BaseModel, Field
@@ -18,3 +19,8 @@ class GetGeotechnicalInputsForFoundationDesign(BaseModel,PartialLiteralMixin):
 class PullGeotechnicalReportTool(BaseModel):
     file_name: str = Field(..., description="Name of the Geotechnical Report. Default: GEO001 - GEOTECHNICAL DATA SUMMARY REV0.pdf")
 
+class FootingDesignTool(BaseModel):
+    footing_soil_data: FootingSoilData  = Field(..., description="Required footing soild data for the inner system to design the optimal footing")
+
+class UploadToAccTool(BaseModel):
+    upload_to_acc: bool

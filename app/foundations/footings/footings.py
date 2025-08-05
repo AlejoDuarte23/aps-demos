@@ -36,7 +36,7 @@ class FootingSoilData(BaseModel):
 
 CONCRETE_COST = 300 #M3
 COMPACTED_FILL_COST = 90 #M3
-EXCAVATION_COST = 20#M3
+EXCAVATION_COST = 40#M3
 
 def calculate_cost(geometry: FootingGeometry) -> float:
     pedestal_volume = geometry.PEDESTAL_WIDTH * geometry.PEDESTAL_WIDTH * geometry.PEDESTAL_HEIGHT
@@ -138,6 +138,7 @@ def find_optimal_footing_geometry(soil: FootingSoilData, reactions: dict[int, di
                     "BaseWidth": entry.B,
                     "EmbedmentDepth": entry.Df,
                     "AllowableBearing": entry.qadm,
+                    "BearingPressure": q_max,
                     "TotalCost": cost,
                     "Compliant": compliant,
                 })
@@ -159,12 +160,16 @@ def store_footing_iterations_as_table(footing_iterations: list[dict]):
     if not footing_iterations:
         table_structure = {"headers": [], "data": [], "flags": []}
     else:
+        # Sort the iterations with compliant options first
+        footing_iterations = sorted(footing_iterations, key=lambda x: not x.get("Compliant", False))
+        
         headers = [
             "Pedestal Width (m)",
             "Slab Thickness (m)",
             "Base Width (m)",
             "Embedment Depth (m)",
             "Allowable Bearing (kPa)",
+            "Bearing Pressure (kPa)",
             "Total Cost",
         ]
 
@@ -177,6 +182,7 @@ def store_footing_iterations_as_table(footing_iterations: list[dict]):
                 it["BaseWidth"],
                 it["EmbedmentDepth"],
                 it["AllowableBearing"],
+                it["BearingPressure"],
                 f"${it.get('TotalCost', 0):,.2f}",
             ])
             flags.append(bool(it.get("Compliant")))
