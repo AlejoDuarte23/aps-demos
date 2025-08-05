@@ -38,17 +38,17 @@ client = instructor.from_openai(OpenAI())
 
 
 class PlotOpenSeesModelTool(BaseModel):
-    pass
+    plot_model: bool
 
 class RunOpenSeesModelTool(BaseModel):
-    pass
+    run_model: bool
 
 class UploadToAccTool(BaseModel):
     note: str = Field(..., description="Use this tool when the user wants to send the updated model to ACC Autodesk platform services")
     pass
 
 class FootingDesignTool(BaseModel):
-    footing_soil_data: FootingSoilData = Field(..., description="")
+    footing_soil_data: FootingSoilData  = Field(..., description="")
 
 class GetGeotechnicalInputsForFoundationDesign(BaseModel):
     design_type: Union[FootingDesignTool, PilesDesignTools] = Field(..., description="")
