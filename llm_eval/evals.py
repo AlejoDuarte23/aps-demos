@@ -4,17 +4,11 @@ from openai import OpenAI
 from textwrap import dedent
 from pydantic import BaseModel, Field
 import instructor
-from typing import Any, Type, Literal
+from typing import Any, Type, Literalf
 from instructor.dsl.partial import PartialLiteralMixin
 
 class Router(BaseModel, PartialLiteralMixin):
     request_type: Literal["Structural", "GeotechnicalInput", "GeotechnicalDesign"]
-
-    
-
-
-
-
 
 
 load_dotenv()

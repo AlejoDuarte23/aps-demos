@@ -19,7 +19,6 @@ class FootingGeometry(BaseModel):
     CLUSTER_TOL: float = Field(default=3.0, description="Tolerance for grouping support nodes.")
 
 class FootingSoilData(BaseModel):
-    model_config = ConfigDict(extra="forbid")
     bearing_table: list[FootingBearingEntry] = Field(..., description="get the values from the context. creaste  list of allowable bearing pressure for combinations of Df and B")
     gamma: float = Field(..., description="Unit weight γ, kN/m³ for Footing design")
     phi: float = Field(..., description="Friction angle φ° for Footing design")
