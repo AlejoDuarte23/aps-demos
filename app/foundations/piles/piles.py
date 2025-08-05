@@ -22,8 +22,8 @@ class ModelWithPiles(BaseModel):
     EDGE_COVER: float = Field(..., description="distance between the piles and the cap edge")
     CLUSTER_TOL: float = Field(..., description="Cluter Tolerance default 3m")
 
-class DesignPiles(BaseModel):
-    soil: PileSoilData = Field(..., description="Extract the soil information from the context, the inner system will take care of getting the optimal pile  dimension and the applied load, focus on getting the all parameters correctly!")
+class PilesDesignTools(BaseModel):
+    soil: PileSoilData = Field(..., description="")
 
 FS_AXIAL = 2.5
 FS_LATERAL = 2.0

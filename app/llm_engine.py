@@ -9,13 +9,12 @@ import instructor
 import plotly.graph_objects as go
 import app.crud.data_management.helpers as aps_helpers
 
-from pydantic import BaseModel, Field, BeforeValidator
+from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 from openai import OpenAI
 from openai.types.chat import ParsedChatCompletion
-from typing import Union, Annotated, Literal
+from typing import Union
 from textwrap import dedent
-from instructor import llm_validator
 import pdfminer.high_level
 
 from app.types import MembersDict, CrossSectionInfo, NodesDict
@@ -28,7 +27,7 @@ from app.opensees.model import Model, calculate_displacements, calculate_reactio
 from app.plots.model_defo import plot_deformed_mesh
 
 from app.foundations.footings.footings import store_footing_iterations_as_table, FootingSoilData
-from app.foundations.piles.piles import ModelWithPiles, DesignPiles, store_pile_iterations_as_table
+from app.foundations.piles.piles import  PilesDesignTools, store_pile_iterations_as_table
 
 from app.geometry.utils import read_nodal_loads, calculate_center_loads_foundation
 from app.plots.model_with_loads import plot_3d_model_with_loads
@@ -37,39 +36,29 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 client = instructor.from_openai(OpenAI())
 
-class PlotModel(BaseModel):
-    when_2_use: str = Field(..., description="Use this tool when the user wants to visualz the mode from ACC or the steel elements")
 
-class RunModel(BaseModel):
-    why: str = Field(..., description="Use this tool to analyse or run the model")
+class PlotOpenSeesModelTool(BaseModel):
     pass
 
-class Upload2Acc(BaseModel):
-    note: str = Field(..., description="Use this tool when the user want to send the updated model to ACC autodesk platrom services")
+class RunOpenSeesModelTool(BaseModel):
     pass
 
-class DesignFooting(BaseModel):
-    # geometry: FootingGeometry
-    soil: FootingSoilData = Field(..., description="Extract the soil information from the context, the inner system will take care of getting the optimal footing dimension and the applied load")
+class UploadToAccTool(BaseModel):
+    note: str = Field(..., description="Use this tool when the user wants to send the updated model to ACC Autodesk platform services")
+    pass
+
+class FootingDesignTool(BaseModel):
+    footing_soil_data: FootingSoilData = Field(..., description="")
 
 class GetGeotechnicalInputsForFoundationDesign(BaseModel):
-    desing_type: Union[DesignFooting, DesignPiles] = Field(..., description= "Use this to get geotechnical inputs for Foundation design of piles or footings. this is used Prior! desiging the foundation, and ask the user if they are happy with the inputs, and the as to proceeed with  DesignFooting or DesignPiles ")
+    design_type: Union[FootingDesignTool, PilesDesignTools] = Field(..., description="")
 
-class GetGeotechnicalReport(BaseModel):
-    file_name: str = Field(..., description=" name of teh Geotechnical Report default:GEO001 - GEOTECHNICAL DATA SUMMARY REV0.pdf ")
+class PullGeotechnicalReportTool(BaseModel):
+    file_name: str = Field(..., description="Name of the Geotechnical Report. Default: GEO001 - GEOTECHNICAL DATA SUMMARY REV0.pdf")
 
-class DisplayLoads(BaseModel):
-    critical_load_case: str = Field(..., description="use this model to plot the model with critical loads from the critical load cases, the system will show it autmatically.")
+class DisplayLoadsTool(BaseModel):
+    critical_load_case: str = Field(..., description="Use this tool to display the OpenSees model with critical loads from the critical load cases. The system will show it automatically.")
     pass 
- 
-class PlotModelWithCaisson(BaseModel):
-    """Pydantic model defining the parameters for a caisson foundation."""
-    CAISSON_WIDTH: float = Field(..., description="Caisson width (along the X-axis)")
-    CAISSON_DEPTH: float = Field(..., description="Caisson depth (along the Y-axis)")
-    CAISSON_THICKNESS: float = Field(..., description="Caisson thickness or height (along the Z-axis)")
-    CLUSTER_TOL: float = Field(..., description="Tolerance for grouping support nodes into a single foundation")
-
-
 
 def convert_model_to_mm(nodes: NodesDict) -> NodesDict:
     nodes_in_mm: NodesDict = {}
@@ -89,9 +78,18 @@ def convert_cs_to_m(cs_dict: dict[int, CrossSectionInfo])-> dict[int, CrossSecti
     return cs_dict_m
 
 class Response(BaseModel):
-    response: str = Field(..., description="Be conversational firendly and Format the response always nicely")
-    selected_tool: Union[None , PlotModel, DesignPiles, RunModel, Upload2Acc, DesignFooting, DisplayLoads, GetGeotechnicalReport, GetGeotechnicalInputsForFoundationDesign] = Field(..., description="Select any of these tools. ")
-
+    response: str = Field(..., description="Be conversational, friendly and format the response always nicely")
+    selected_tool: Union[
+        None,
+        PilesDesignTools,
+        PlotOpenSeesModelTool,
+        RunOpenSeesModelTool,
+        UploadToAccTool,
+        FootingDesignTool,
+        DisplayLoadsTool,
+        PullGeotechnicalReportTool,
+        GetGeotechnicalInputsForFoundationDesign
+    ] = Field(..., description="""Select any of these tools.""")
 
 def llm_response(conversation_history: list[dict],
                  verbose: bool = True) -> ParsedChatCompletion[Response]:
@@ -102,8 +100,8 @@ def llm_response(conversation_history: list[dict],
         "role": "system",
         "content": dedent(
             """
-            You are a helpful assistant with the following context, who formats responses clearly and helps users analyze structures comming
-            from Autodesk Construcction Cloud (ACC) using the VITKOR - APS Integration an also optimize and design foundation.
+            You are a helpful assistant with the following context, who formats responses clearly and helps users analyze structures coming
+            from Autodesk Construction Cloud (ACC) using the VIKTOR - APS Integration and also optimize and design foundations!
             """
         )
     }
@@ -113,12 +111,11 @@ def llm_response(conversation_history: list[dict],
         logger.debug("Request messages:\n%s", pprint.pformat(messages))
     
     resp_chunks = client.chat.completions.create_partial(
-        model="gpt-4o",
+        model="gpt-4.1-mini",
         messages=messages,
-        response_model=Response,
-        temperature=0.4,
-    )
+        response_model=Response
 
+    )
     resp_final = None
     # Streaming
     for resp in resp_chunks:
@@ -152,14 +149,14 @@ def execute_tool(response: Response, conversation: list[dict] | None = None) -> 
     """Exectue the tools based on the user query and file_content. Generates a text response
     or a Plotly view."""
     print(f"[Debug] {response}")
-    if isinstance(response.selected_tool, PlotModel):
+    if isinstance(response.selected_tool, PlotOpenSeesModelTool):
         nodes, lines, members, cs_dict = get_model()
         cs_dict_m = convert_cs_to_m(cs_dict=cs_dict)
         fig = plot_3d_model(nodes, lines, members, cs_dict_m)
         # print(fig)
         return response.response, fig
     
-    if isinstance(response.selected_tool, DesignPiles):
+    if isinstance(response.selected_tool, PilesDesignTools):
         nodes, lines, members, cs_dict = get_model()
         raw = vkt.Storage().get("ifc_model", scope="entity").getvalue()
         loads_dict = read_nodal_loads(raw)
@@ -170,7 +167,6 @@ def execute_tool(response: Response, conversation: list[dict] | None = None) -> 
         my_model.create_model()
         my_model.run_model()
         reactions = calculate_reactions(nodes=nodes)
-
 
         
         from app.foundations.piles.piles import find_optimal_pile
@@ -188,7 +184,7 @@ def execute_tool(response: Response, conversation: list[dict] | None = None) -> 
 
         if conversation:
             conversation.append({"role":"assistant","content":response.response})
-            conversation.append({"role":"user", "content": f" The tool generate the following results: Optimal geometry {pile_geometry}, construction cost:#${cost} usd, lateral strength: {h_strenght} kN, comprresion streghnt {compression_strenght} kpa and tension strength {tension_strenght}kpa  with a safety factor of 2 and 2.5 respectively. let the user knwo The foundation model will be render in the RHS view"})
+            conversation.append({"role":"user", "content": f" The tool generated the following results: Optimal geometry {pile_geometry}, construction cost: ${cost} USD, lateral strength: {h_strenght} kN, compression strength {compression_strenght} kPa and tension strength {tension_strenght} kPa with a safety factor of 2 and 2.5 respectively. Let the user know the foundation model will be rendered in the RHS view."})
             new_response = llm_response(conversation_history=conversation)
             if new_response:
                 return new_response.response, fig
@@ -200,13 +196,13 @@ def execute_tool(response: Response, conversation: list[dict] | None = None) -> 
 
         if conversation:
             conversation.append({"role":"assistant","content":response.response})
-            conversation.append({"role":"user", "content": f" Base on the text get the require soil parameters to design the foundation: {text}. tell the user the inputs to be used and if he want to proceed to DESIGN the foundation with parameters, Do not make markdown tables in chat!."})
+            conversation.append({"role":"user", "content": f" Based on the text, get the required soil parameters to design the foundation: {text}. Tell the user the inputs to be used and if they want to proceed to DESIGN the foundation with these parameters. Do not make markdown tables in chat!"})
             new_response = llm_response(conversation_history=conversation)
             if new_response:
                 return new_response.response, None
         return new_response, None
     
-    if isinstance(response.selected_tool, DesignFooting):
+    if isinstance(response.selected_tool, FootingDesignTool):
 
         soil = response.selected_tool.soil
         for entry in response.selected_tool.soil.bearing_table:
@@ -218,7 +214,7 @@ def execute_tool(response: Response, conversation: list[dict] | None = None) -> 
                     conversation.append({"role":"assistant","content":str(response.selected_tool)})
                     conversation.append({"role":"user", "content": f"in your last answer one or more values of qadm were None give the correct bearing table input using the data {text}"})
                     new_response = llm_response(conversation_history=conversation)
-                    if isinstance(new_response.selected_tool, DesignFooting):
+                    if isinstance(new_response.selected_tool, FootingDesignTool):
                         soil = new_response.selected_tool.soil
                         break
                     
@@ -250,33 +246,14 @@ def execute_tool(response: Response, conversation: list[dict] | None = None) -> 
 
         if conversation:
             conversation.append({"role":"assistant","content":response.response})
-            conversation.append({"role":"user", "content": f" The tool generate the following results: Optiomal geometry {footing_geometry}, construction cost: USD{cost}, acting soil pressure: {soil_pressure} let the user knwo The foundation model will be render in the RHS view"})
+            conversation.append({"role":"user", "content": f" The tool generated the following results: Optimal geometry {footing_geometry}, construction cost: USD {cost}, acting soil pressure: {soil_pressure}. Let the user know the foundation model will be rendered in the RHS view."})
             new_response = llm_response(conversation_history=conversation)
             if new_response:
                 return new_response.response, fig
         
         return response.response, fig
-
-    if isinstance(response.selected_tool, PlotModelWithCaisson):
-        nodes, lines, members, cs_dict = get_model()
-        cs_dict_m = convert_cs_to_m(cs_dict=cs_dict)
-        footing_params_dict = response.selected_tool.model_dump()
-        support_nodes = collect_support_nodes(nodes)
-        caisson_locations = group_caisson_locations(
-            support_nodes,
-            cluster_tol=footing_params_dict['CLUSTER_TOL']
-        )
-        fig = plot_3d_with_caissons(
-            nodes=nodes,
-            lines=lines,
-            members=members,
-            cross_sections=cs_dict,
-            caissons=caisson_locations,
-            foundation_params=footing_params_dict
-        )
-        return response.response, fig
     
-    if isinstance(response.selected_tool, RunModel):
+    if isinstance(response.selected_tool, RunOpenSeesModelTool):
         nodes, lines, members, cs_dict = get_model()
         raw = vkt.Storage().get("ifc_model", scope="entity").getvalue()
         loads_dict = read_nodal_loads(raw)
@@ -299,13 +276,13 @@ def execute_tool(response: Response, conversation: list[dict] | None = None) -> 
         fig = plot_deformed_mesh(disp_dict=disp_dict_m, members=members, cross_sections= cs_dict_m, nodes=nodes, lines=lines)
         if conversation:
             conversation.append({"role":"assistant","content":response.response})
-            conversation.append({"role":"user", "content": f" The tool generate the following results: Reaction loads [kN] {reactions}, Design load at the center of each foundation kN and kN*m:{center_loads}, deformed shape of the model will be displayed in the RHS of the app"})
+            conversation.append({"role":"user", "content": f" The tool generated the following results: Reaction loads [kN] {reactions}, design load at the center of each foundation (kN and kN·m): {center_loads}, deformed shape of the model will be displayed in the RHS of the app."})
             new_response = llm_response(conversation_history=conversation)
             if new_response:
                 return new_response.response, fig
         return response.response, fig
     
-    if isinstance(response.selected_tool, DisplayLoads):
+    if isinstance(response.selected_tool, DisplayLoadsTool):
         nodes, lines, members, cs_dict = get_model()
         cs_dict_m = convert_cs_to_m(cs_dict=cs_dict)
         
@@ -314,7 +291,7 @@ def execute_tool(response: Response, conversation: list[dict] | None = None) -> 
         fig = plot_3d_model_with_loads(nodes,lines,members, cs_dict, loads_dict)
         if conversation:
             conversation.append({"role":"assistant","content":response.response})
-            conversation.append({"role":"user", "content": f" The tool generate the following results: loads nodes id and magnitud [kN] {loads_dict}, tell user  wind loads are not shown and this loads belong to the critical load for foundation design (wire loads + Wind), loads will be render in the RRHS of the view. list the loads in bullet points  for the user but do not make a markdown table"})
+            conversation.append({"role":"user", "content": f" The tool generated the following results: load node IDs and magnitudes [kN] {loads_dict}. Tell the user wind loads are not shown and these loads belong to the critical load for foundation design (wire loads + wind). Loads will be rendered in the RHS of the view. List the loads in bullet points for the user but do not make a markdown table."})
             new_response = llm_response(conversation_history=conversation)
             if new_response:
                 return new_response.response, fig
@@ -322,7 +299,7 @@ def execute_tool(response: Response, conversation: list[dict] | None = None) -> 
         # print(fig)
         return response.response, fig
 
-    if isinstance(response.selected_tool, GetGeotechnicalReport):    
+    if isinstance(response.selected_tool, PullGeotechnicalReportTool):    
         integration = vkt.external.OAuth2Integration("aps-integration-1")
         token = integration.get_access_token()
 
@@ -354,13 +331,13 @@ def execute_tool(response: Response, conversation: list[dict] | None = None) -> 
 
         if conversation:
             conversation.append({"role":"assistant","content":response.response})
-            conversation.append({"role":"user", "content": f" The tool retrieve the following report from the folder: Files/Structural/Geotechnical : {text}. tell the user a succint sumaary of the content, and if he wants to design the foundation of the structural model using this data, you have the data to design piles, footings and monopiles!"})
+            conversation.append({"role":"user", "content": f" The tool retrieved the following report from the folder: Files/Structural/Geotechnical: {text}. Tell the user a succinct summary of the content, and if they want to design the foundation of the structural model using this data. You have the data to design piles, footings, and monopiles!"})
             new_response = llm_response(conversation_history=conversation)
             if new_response:
                 return new_response.response, None
         return new_response.response, None
 
-    if isinstance(response.selected_tool, Upload2Acc):
+    if isinstance(response.selected_tool, UploadToAccTool):
 
         """Upload an IFC file to ACC in the folder selected in the UI."""
         # Get token and parameters from UI
@@ -380,7 +357,7 @@ def execute_tool(response: Response, conversation: list[dict] | None = None) -> 
             return
         
         # Read the IFC file from disk
-        file_name = "Substation_Gantry_GA_with_piles.ifc"
+        file_name = "Substation_Gantry_GA_with_footings.ifc"
         ifc_file_path = os.path.join(os.path.dirname(__file__), 'geometry', file_name)
         
         with open(ifc_file_path, 'rb') as file:
