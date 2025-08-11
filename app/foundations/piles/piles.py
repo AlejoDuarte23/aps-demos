@@ -123,9 +123,12 @@ def store_pile_iterations_as_table(pile_iterations: list[dict]):
     Converts a list of pile iteration dicts into a plain table structure
     and stores it as JSON in vkt.Storage.
     Storage key: "piles_iteration"
+    
+    Includes structural capacity parameters:
+    - Compression Strength (Qallow_comp)
+    - Tension Capacity (Qallow_ten)
+    - Horizontal Load Capacity (Hallow)
     """
-
-
     if not pile_iterations:
         table_structure = {"headers": [], "data": [], "flags": []}
     else:
@@ -135,6 +138,9 @@ def store_pile_iterations_as_table(pile_iterations: list[dict]):
             "Excavation Cost",
             "Concrete Cost",
             "Total Cost",
+            "Compression (kN)",
+            "Tension (kN)",
+            "Horizontal (kN)",
         ]
         data = []
         flags = []
@@ -145,6 +151,9 @@ def store_pile_iterations_as_table(pile_iterations: list[dict]):
                 f"${it.get('ExcavationCost', 0):,.2f}",
                 f"${it.get('ConcreteCost', 0):,.2f}",
                 f"${it.get('TotalCost', 0):,.2f}",
+                f"{it.get('Qallow_comp', 0):,.2f}",
+                f"{it.get('Qallow_ten', 0):,.2f}",
+                f"{it.get('Hallow', 0):,.2f}",
             ])
             flags.append(bool(it.get("Compliant")))
 

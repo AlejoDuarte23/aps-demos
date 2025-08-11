@@ -155,7 +155,7 @@ def execute_tool(response: StructuralTools, conversation: list[dict] | None = No
         loads_dict = read_nodal_loads(raw)
         fig = plot_3d_model_with_loads(nodes,lines,members, cs_dict, loads_dict)
         if conversation:
-            tool_result = f" The tool generated the following results: load node IDs and magnitudes [kN] {loads_dict}. Tell the user wind loads are not shown and these loads belong to the critical load for foundation design (wire loads + wind). Loads will be rendered in the RHS of the view. List the loads in bullet points for the user but do not make a markdown table."
+            tool_result = f" The tool generated the following results: load node IDs and magnitudes [kN] {loads_dict}. Tell the user wind loads are applied on the structure but they are not shown. The loads shown in the scene belong to the critical load for foundation design (wire loads + wind). Loads will be rendered in the RHS of the view. List the loads in bullet points for the user but do not make a markdown table."
             # new_response = llm_response(conversation_history=conversation)
             back_response = llm_back_call(assitant_message=response.response, tool_result=tool_result, conversation_history=conversation)
             if back_response:
@@ -184,8 +184,8 @@ def execute_tool(response: StructuralTools, conversation: list[dict] | None = No
         cs_dict_m = convert_cs_to_m(cs_dict=cs_dict)
         fig = plot_deformed_mesh(disp_dict=disp_dict_m, members=members, cross_sections= cs_dict_m, nodes=nodes, lines=lines)
     
-        tool_result = f" The tool generated the following results: Reaction loads [kN] {reactions}, design load at the center of each foundation (kN and kN·m): {center_loads}, deformed shape of the model will be displayed in the RHS of the app."
-        new_response = llm_back_call(conversation=conversation, assitant_message=response.response, tool_result=tool_result)
+        tool_result = f" The tool generated the following results: Reaction loads [N] {reactions} Newtons, design load at the center of each foundation (kN and kN·m): {center_loads}, deformed shape of the model will be displayed in the RHS of the app."
+        new_response = llm_back_call(conversation_history=conversation, assitant_message=response.response, tool_result=tool_result)
 
         if new_response:
             return new_response, fig

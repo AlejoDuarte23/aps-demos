@@ -39,8 +39,7 @@ def structural_agent(conversation_history: list[dict]) -> StructuralTools:
             2. RunOpenSeesModelTool: Use when the user wants to analyze the model, calculate reactions,
                displacements, or any other type of structural analysis.
                
-            3. DisplayLoadsTool: Use when the user specifically wants to see or visualize the loads
-               applied to the structural model.
+            3. DisplayLoadsTool: Use when the user specifically wants to see or visualize the loads applied to the OpenSees structural model. User request like: " Display the loads from the critical load combination."
 
             Be clear and friendly in your response, and explain why you selected the specific tool.
             """

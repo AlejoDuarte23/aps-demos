@@ -358,7 +358,10 @@ def plot_3d_with_foundations(
 
     cs_ids = sorted({m["cross_section_id"] for m in members.values()})
     color_map = {cs_id: PASTEL_PALETTE[i % len(PASTEL_PALETTE)] for i, cs_id in enumerate(cs_ids)}
-    cs_labels = {cs_id: cross_sections[cs_id].get("Description", f"Section {cs_id}") for cs_id in cs_ids}
+    cs_labels = {
+        cs_id: cross_sections[cs_id].get("Description", f"Section {cross_sections[cs_id]['name']}")
+        for cs_id in cs_ids
+    }
     
     # --- 2. Add Invisible Bounding Box for Stable Camera ---
     x0, x1 = min(x_nodes), max(x_nodes)
@@ -370,10 +373,23 @@ def plot_3d_with_foundations(
     yb = [yc - max_range/2, yc + max_range/2]
     zb = [zc - max_range/2, zc + max_range/2]
 
-    fig.add_trace(go.Scatter3d(x=xb*4, y=sorted(yb*4), z=np.repeat(zb, 4), mode='markers', marker=dict(size=0, color='rgba(0,0,0,0)')))
+    # Add invisible boundary points without trace name
+    fig.add_trace(go.Scatter3d(
+        x=xb*4, y=sorted(yb*4), z=np.repeat(zb, 4),
+        mode='markers',
+        marker=dict(size=0, color='rgba(0,0,0,0)'),
+        hoverinfo='none',
+        showlegend=False
+    ))
 
     # --- 3. Draw Gantry Structure (Beams and Nodes) ---
-    fig.add_trace(go.Scatter3d(x=x_nodes, y=y_nodes, z=z_nodes, mode="markers", marker=dict(size=3, color="black"), hoverinfo="text", showlegend=False))
+    fig.add_trace(go.Scatter3d(
+        x=x_nodes, y=y_nodes, z=z_nodes,
+        mode="markers",
+        marker=dict(size=3, color="black"),
+        hoverinfo="text",
+        showlegend=False
+    ))
     
     for member in members.values():
         line = lines[member["line_id"]]
@@ -421,19 +437,38 @@ def plot_3d_with_foundations(
             cone_v, qi, qj, qk = compute_cone_mesh(cone_base, cone_h, cone_r)
             add_mesh_to_fig(fig, cone_v, qi, qj, qk, "red")
 
-    # --- 6. Finalize Layout and Legend ---
+    # --- 6. Add Legend Entries for Cross Sections Only ---
+    # Add entries for each cross section with proper names
     for cs_id in cs_ids:
-        fig.add_trace(go.Scatter3d(x=[None], y=[None], z=[None], mode="markers",
+        fig.add_trace(go.Scatter3d(
+            x=[None], y=[None], z=[None], 
+            mode="markers",
             marker=dict(symbol="square", size=10, color=color_map[cs_id]),
-            name=cs_labels[cs_id], showlegend=True))
+            name=cs_labels[cs_id], 
+            showlegend=True
+        ))
 
+    # --- 7. Finalize Layout ---
     fig.update_layout(
         scene=dict(
-            aspectmode='data', xaxis_visible=False, yaxis_visible=False, zaxis_visible=False,
-            bgcolor="white", camera=dict(eye=dict(x=1.5, y=1.5, z=1.5))),
-        paper_bgcolor="white", margin=dict(l=0, r=0, t=40, b=0),
-        legend=dict(x=0.95, y=0.05, xanchor="right", yanchor="bottom",
-            bgcolor="rgba(0,0,0,0)", borderwidth=0, itemsizing="constant", font=dict(size=16, color="black"))
+            aspectmode='data',
+            xaxis_visible=False,
+            yaxis_visible=False,
+            zaxis_visible=False,
+            bgcolor="white",
+            camera=dict(eye=dict(x=1.5, y=1.5, z=1.5)),
+        ),
+        paper_bgcolor="white",
+        margin=dict(l=0, r=0, t=40, b=0),
+        legend=dict(
+            x=0.95, y=0.05, 
+            xanchor="right", 
+            yanchor="bottom",
+            bgcolor="rgba(0,0,0,0)",  # Transparent background
+            borderwidth=0,  # No border
+            itemsizing="constant", 
+            font=dict(size=16, color="black")
+        )
     )
 
     return fig
@@ -467,7 +502,9 @@ def group_four_pile_sets(
 
 
 def calculate_moments(reactions):
-    ...
+    """Calculate bending moments based on reaction forces"""
+    # Implementation to be completed later
+    pass
 
 # if __name__ == "__main__":
 
@@ -498,6 +535,16 @@ def calculate_moments(reactions):
     # foundation_params_dict = foundation_params_model.model_dump()
     # support_nodes = collect_support_nodes(nodes)
     # caps = group_four_pile_sets(support_nodes, cluster_tol=foundation_params_dict['CLUSTER_TOL'])
+
+    # fig = plot_3d_with_foundations(
+    #     nodes=nodes,
+    #     lines=lines,
+    #     members=members,
+    #     cross_sections=cs_dict,
+    #     caps=caps,
+    #     foundation_params=foundation_params_dict
+    # )
+    # fig.show()
 
     # fig = plot_3d_with_foundations(
     #     nodes=nodes,

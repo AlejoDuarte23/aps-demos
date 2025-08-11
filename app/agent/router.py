@@ -30,7 +30,7 @@ def agent_router(conversation_history: list[dict]) -> Router:
                such as soil reports, soil parameters, or ground conditions.
             
             3. "GeotechnicalDesign": Requests specifically about designing foundations (footings or piles) 
-               using previously obtained geotechnical data.
+               using previously obtained geotechnical data. Also you can upload, push, send the updated model to Acc Autodesk Construction Cloud 
             
             4. "None": General conversation, greetings, or questions not related to the above categories.
             
