@@ -192,6 +192,22 @@ def execute_tool(response: StructuralTools, conversation: list[dict] | None = No
         return response.response, fig
 
     if isinstance(response.tool, PullGeotechnicalReportTool):
+        # integration = vkt.external.OAuth2Integration("aps-integration-1")
+        # token = integration.get_access_token()
+        # file_content = aps_helpers.get_file_content(
+        #     token=token,
+        #     hub_name= "alejandroduartevendries@gmail.com",
+        #     project_name="Construction : Sample Project - Seaport Civic Center",
+        #     subfolder_path="Project Files/Structural/Geotechnical",
+        #     file_name="GEO001 - GEOTECHNICAL DATA SUMMARY REV0.pdf",
+        # )
+        # # print(f"{file_content=}, {type(file_content)=}")
+       
+        # vkt.Storage().set(
+        #     "geotechnical_report",
+        #     data=vkt.File.from_data(file_content),
+        #     scope="entity",
+        # )
         raw: bytes = vkt.Storage().get("geotechnical_report", scope="entity").getvalue_binary()
         pdf_stream = io.BytesIO(raw)
         text = pdfminer.high_level.extract_text(pdf_stream)
@@ -294,7 +310,12 @@ def execute_tool(response: StructuralTools, conversation: list[dict] | None = No
     if isinstance(response.tool, UploadToAccTool):
 
         """Upload an IFC file to ACC in the folder selected in the UI."""
-        # Get token and parameters from UI
+
+        # Updat IFC Model
+        from app.foundations.footings.ifc_footing import update_ifc_model
+        
+        update_ifc_model(PEDESTAL_WIDTH = response.tool.PEDESTAL_WIDTH, PEDESTAL_HEIGHT=response.tool.PEDESTAL_WIDTH, SLAB_THICK=response.tool.SLAB_THICK, SLAB_BASE_SIZE = response.tool.SLAB_BASE_SIZE)
+            # Get token and parameters from UI
         integration = vkt.external.OAuth2Integration("aps-integration-1")
         token = integration.get_access_token()
         # Get project and folder IDs
@@ -304,7 +325,7 @@ def execute_tool(response: StructuralTools, conversation: list[dict] | None = No
         print("project id",project_id)
         # Get folder ID for the selected subfolder path
         all_paths_with_ids = aps_helpers.get_all_folder_paths_with_ids(hub_id, project_id, token)
-        folder_id = "urn:adsk.wipprod:fs.folder:co.znBylNjGSiOypYNeAgrIbw"#next((fid for path, fid in all_paths_with_ids if path =="Files/Structural"), None) # Files/Structural
+        folder_id = "urn:adsk.wipprod:fs.folder:co.1NV3xBdHRmqbWaD_s2pR4Q"#next((fid for path, fid in all_paths_with_ids if path =="Files/Structural"), None) # Files/Structural
         
         if not folder_id:
             print("Could not find folder ID for path 'Files/Structural'")
@@ -312,6 +333,8 @@ def execute_tool(response: StructuralTools, conversation: list[dict] | None = No
         
         # Read the IFC file from disk
         file_name = "Substation_Gantry_GA_with_footings.ifc"
+        # file_name = "Substation_Gantry_GA_with_piles.ifc"
+
         ifc_file_path = os.path.join(os.path.dirname(__file__), 'geometry', file_name)
         
         with open(ifc_file_path, 'rb') as file:
@@ -448,20 +471,20 @@ def execute_tool(response: StructuralTools, conversation: list[dict] | None = No
     #     #     file_name=params.step1.files,
     #     # )
 
-    #     # file_content = aps_helpers.get_file_content(
-    #     #     token=token,
-    #     #     hub_name= "alejandroduartevendries@gmail.com",
-    #     #     project_name="Construction : Sample Project - Seaport Civic Center",
-    #     #     subfolder_path="Project Files/Structural/Geotechnical",
-    #     #     file_name="GEO001 - GEOTECHNICAL DATA SUMMARY REV0.pdf",
-    #     # )
-    #     # print(f"{file_content=}, {type(file_content)=}")
+        # file_content = aps_helpers.get_file_content(
+        #     token=token,
+        #     hub_name= "alejandroduartevendries@gmail.com",
+        #     project_name="Construction : Sample Project - Seaport Civic Center",
+        #     subfolder_path="Project Files/Structural/Geotechnical",
+        #     file_name="GEO001 - GEOTECHNICAL DATA SUMMARY REV0.pdf",
+        # )
+        # # print(f"{file_content=}, {type(file_content)=}")
        
-    #     # vkt.Storage().set(
-    #     #     "geotechnical_report",
-    #     #     data=vkt.File.from_data(file_content),
-    #     #     scope="entity",
-    #     # )
+        # vkt.Storage().set(
+        #     "geotechnical_report",
+        #     data=vkt.File.from_data(file_content),
+        #     scope="entity",
+        # )
     #     raw: bytes = vkt.Storage().get("geotechnical_report", scope="entity").getvalue_binary()
     #     pdf_stream = io.BytesIO(raw)
     #     text = pdfminer.high_level.extract_text(pdf_stream)

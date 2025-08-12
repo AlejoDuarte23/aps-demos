@@ -1,3 +1,4 @@
+import math
 from pydantic import BaseModel, Field, ConfigDict
 
 
@@ -52,29 +53,57 @@ def calculate_cost(geometry: FootingGeometry) -> float:
     total_cost = concrete_cost + fill_cost + excavation_cost
     return total_cost
 
-def max_bearing_pressure(P: float, M: float, B: float) -> float | None:
+def max_bearing_pressure(
+    P: float,
+    M: float,
+    B: float,
+    *,
+    eps: float = 1e-9,
+    min_contact_ratio: float = 0.01  # minimum contact length as a fraction of B (e.g., 1%)
+) -> float:
     """
-    Return the maximum soil pressure [kPa] for a square footing of width B [m]
+    Maximum soil pressure [kPa] for a square footing of width B [m],
     loaded by vertical force P [kN] and moment M [kN·m] about the X-axis.
 
-    Case A   | |e| ≤ B / 6     : trapezoidal stress, q_max = (P / A) · (1 + 6·|e| / B)
-    Case B   | |e| = B / 6     : triangular stress,  q_max = 2 P / A
-    Case C   | B / 6 < |e| < B / 2 : triangular stress on a reduced contact length,
-                                      q_max = 2 P / [3 · B · (0.5·B − |e|)]
-    Outside  | |e| ≥ B / 2     : uplift over the whole base, return None
-    """
-    if P <= 0 or B <= 0:
-        return None                       # invalid load or geometry
-    e = M / P                            # [m]
-    A = B ** 2                           # [m²]
+    Always returns a finite float. Never returns None or inf.
 
-    if abs(e) < B / 6:
-        return (P / A) * (1 + 6 * abs(e) / B)              # :contentReference[oaicite:0]{index=0}
-    if abs(e) == B / 6:
-        return 2 * P / A                                    # :contentReference[oaicite:1]{index=1}
-    if abs(e) < B / 2:
-        return 2 * P / (3 * B * (0.5 * B - abs(e)))         # :contentReference[oaicite:2]{index=2}
-    return None                                             # column outside the base
+    Method
+    - Standard formulas for |e| < B/2.
+    - Near and beyond |e| = B/2, enforce a minimum contact length L_min = min_contact_ratio * B,
+      and compute the triangular-pressure peak as if the contact length were L_min:
+          q_max = 2P / (3 * B * L_min)
+    - Use eps for robust comparisons.
+    """
+    # Validate inputs
+    if not all(map(math.isfinite, (P, M, B))) or P <= 0.0 or B <= 0.0:
+        return math.nan
+
+    # Sanitize min_contact_ratio
+    # Clamp to a sensible range to avoid zero or overly large contact lengths
+    r = max(1e-6, min(0.25, float(min_contact_ratio)))  # up to 25% is safe for this cap
+    L_min = r * B
+
+    e = M / P
+    ae = abs(e)
+    A = B * B
+
+    # Case A: |e| < B/6 → trapezoidal
+    if ae < (B / 6.0) - eps:
+        return (P / A) * (1.0 + 6.0 * ae / B)
+
+    # Case B: |e| == B/6 within tolerance → triangular over full base
+    if abs(ae - (B / 6.0)) <= eps:
+        return 2.0 * P / A
+
+    # Case C: B/6 < |e| < B/2 → triangular on reduced contact length
+    if ae < (B / 2.0) - eps:
+        L = B - 2.0 * ae  # actual contact length
+        denom = 3.0 * B * max(L, L_min)  # enforce minimum contact length
+        return 2.0 * P / denom
+
+    # Outside kern or at the edge: enforce minimum contact length cap
+    # Treat as extreme triangular contact of length L_min.
+    return 2.0 * P / (3.0 * B * L_min)                                   # column outside the base
 
 
 

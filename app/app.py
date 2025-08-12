@@ -31,7 +31,7 @@ def store_scene(figure: go.Figure, view_name: Literal["view"] = "view") -> None:
     )
 
 def get_visibility(params, **kwargs):
-    if not params.step2.chat:
+    if not params.step3.chat:
         entities = vkt.Storage().list(scope="entity")
         for entity in entities:
             if entity == "optimization_table":
@@ -111,15 +111,48 @@ You can then send the updated CAD file back to ACC!
     step1.text2 = vkt.Text("## Fetch Data")
     step1.agent_contenxt = vkt.ActionButton("Get files from  ACC", method="store_file_in_app")
     # step1.upload_file = vkt.ActionButton("Upload File to ACC", method="send_data2acc")
+    step2 = vkt.Step("Project Location and Wind Parameters", views=[ "show_map", "calculate_wind_pressures"])
+    step2.location_title = vkt.Text(" # Project Location")
+    step2.location_description = vkt.Text("Select the project location on the map. The application will retrieve the elevation and regional wind speed based on the coordinates.")
+
+    step2.location = vkt.GeoPointField(' ', default=vkt.GeoPoint(36.16580333278468, -86.78240505816933))
+    step2.wind_parameters = vkt.Text("# Wind Design Parameters")
+    step2.wind_descrition = vkt.Text("Define the structural parameters for wind load calculation. Select the exposure and risk categories according to the site conditions. Enter the overall structure height and the solidity ratio, which represents the projected solid area divided by the gross face area.")
+    # Input fields as specified
+    step2.exposure_category = vkt.OptionField(
+        'Exposure category', 
+        options=['B', 'C', 'D'], 
+        default='B'
+    )
     
-    step2 = vkt.Step("Structural Agent", views=["get_plotly_view","design_results_view"])
-    step2.text1 = vkt.Text(dedent(
+    step2.risk_category = vkt.OptionField(
+        'Risk category', 
+        options=['I', 'II', 'III', 'IV'], 
+        default='III'
+    )
+    step2.lbrk = vkt.LineBreak()
+    step2.overall_height = vkt.NumberField(
+        'Overall height', 
+        suffix='m', 
+        default=16,
+        min=0
+    )
+    
+    step2.solidity_ratio = vkt.NumberField(
+        'Solidity ratio, ϕ', 
+        default=0.30,
+        min=0,
+        max=1,
+        num_decimals=2
+    )
+    step3 = vkt.Step("Structural Agent", views=["get_plotly_view","design_results_view"])
+    step3.text1 = vkt.Text(dedent(
         """# Structural Agent
 
 Talk to an **AI agent** to analyze the structural model, **get reaction loads**, assess foundation alternatives (pile foundation, monopile/caisson, and footing), then generate and update the CAD file and push it to ACC.
 """
     ))
-    step2.chat = vkt.Chat("", method="call_llm")
+    step3.chat = vkt.Chat("", method="call_llm")
 
 class Controller(vkt.Controller):
     parametrization = Parametrization(width=40)
@@ -155,7 +188,7 @@ class Controller(vkt.Controller):
             hub_name=params.step1.hubs,
             project_name=params.step1.project,
             subfolder_path=params.step1.subfolder_path,
-            file_name=params.step1.files,
+            file_name=params.step1.stored_file,
         )
         vkt.Storage().set(
             "ifc_model",
@@ -176,7 +209,7 @@ class Controller(vkt.Controller):
     def call_llm(self, params, **kwargs) -> vkt.ChatResult | None:
             """Multi-turn conversation between the user and the agent."""
             # Get conversation
-            conversation_history = params.step2.chat.get_messages()
+            conversation_history = params.step3.chat.get_messages()
             #  Check if user uploaded an Excel Field
             if conversation_history:
                 response = llm_response(
@@ -189,7 +222,7 @@ class Controller(vkt.Controller):
                         print("Storing fig")
                         store_scene(fig)
                         get_visibility(params,**kwargs)
-                    return vkt.ChatResult(params.step2.chat, llm_message)
+                    return vkt.ChatResult(params.step3.chat, llm_message)
                 else:
                     raise ValueError("The LLM returned no parsed reponse.")
             return None
@@ -200,7 +233,7 @@ class Controller(vkt.Controller):
         All tool calls are go.Figures exported as JSON. They are saved in
         Storage and retrieved here."""
         # 1. Delete tools calls from storage if there is no .xlsx file
-        if not params.step2.chat:
+        if not params.step3.chat:
             entities = vkt.Storage().list(scope="entity")
             for entity in entities:
                 if entity == "view":
@@ -388,3 +421,104 @@ class Controller(vkt.Controller):
             data=styled_rows,
             column_headers=headers
         )
+
+    @vkt.MapView("Location Selection")
+    def show_map(self, params, **kwargs):
+        """Display map with selected location"""
+        # Create a map point at the selected location
+        map_point = vkt.MapPoint.from_geo_point(
+            params.step2.location,
+            title="Selected Location",
+            description=f"Lat: {params.step2.location.lat:.4f}, Lon: {params.step2.location.lon:.4f}",
+            color=vkt.Color(255, 0, 0)  # Red marker
+        )
+        
+        return vkt.MapResult([map_point])
+
+    @vkt.DataView("Wind Analysis Results")
+    def calculate_wind_pressures(self, params, **kwargs):
+        """Calculate wind pressures based on input parameters"""
+        
+        # Extract coordinates
+        latitude = params.step2.location.lat
+        longitude = params.step2.location.lon
+        
+        # Mock calculation coefficients (in real application, these would be calculated based on location and parameters)
+        coefficients = {
+            "Kz": 1.04,  # Velocity pressure exposure coefficient
+            "Kd": 0.85,  # Directionality factor
+            "Kzt": 1.00, # Topographic factor
+            "Ke": 1.00,  # Air density factor
+            "G": 0.85,   # Gust effect factor
+            "Cf": 2.94   # Force coefficient for lattice framework
+        }
+        
+        # Mock wind speeds and pressures (in real application, these would be calculated from wind data)
+        ultimate_wind = {
+            "V_ms": 50.96,
+            "qz_kPa": 1.407,
+            "p_kPa": 3.520
+        }
+        
+        service_wind = {
+            "y10": {"V_ms": 31.29, "qz_kPa": 0.531, "p_kPa": 1.326},
+            "y25": {"V_ms": 34.42, "qz_kPa": 0.642, "p_kPa": 1.604},
+            "y50": {"V_ms": 37.10, "qz_kPa": 0.746, "p_kPa": 1.864},
+            "y100": {"V_ms": 39.79, "qz_kPa": 0.858, "p_kPa": 2.144}
+        }
+        
+        # Create data groups for display
+        data = vkt.DataGroup()
+        
+        # Location information
+        location_group = vkt.DataGroup()
+        location_group.add(
+            vkt.DataItem("Latitude", f"{latitude:.4f}", suffix="°"),
+            vkt.DataItem("Longitude", f"{longitude:.4f}", suffix="°")
+        )
+        data.add(vkt.DataItem("Location", subgroup=location_group))
+        
+        # Input parameters
+        input_group = vkt.DataGroup()
+        input_group.add(
+            vkt.DataItem("Exposure Category", params.step2.exposure_category),
+            vkt.DataItem("Risk Category", params.step2.risk_category),
+            vkt.DataItem("Overall Height", params.step2.overall_height, suffix="m"),
+            vkt.DataItem("Solidity Ratio (ϕ)", params.step2.solidity_ratio)
+        )
+        data.add(vkt.DataItem("Input Parameters", subgroup=input_group))
+        
+        # Coefficients
+        coeff_group = vkt.DataGroup()
+        coeff_group.add(
+            vkt.DataItem("Kz (Velocity pressure exposure coefficient)", coefficients["Kz"]),
+            vkt.DataItem("Kd (Directionality factor)", coefficients["Kd"]),
+            vkt.DataItem("Kzt (Topographic factor)", coefficients["Kzt"]),
+            vkt.DataItem("Ke (Air density factor)", coefficients["Ke"]),
+            vkt.DataItem("G (Gust effect factor)", coefficients["G"]),
+            vkt.DataItem("Cf (Force coefficient)", coefficients["Cf"])
+        )
+        data.add(vkt.DataItem("Coefficients", subgroup=coeff_group))
+        
+        # Ultimate wind
+        ultimate_group = vkt.DataGroup()
+        ultimate_group.add(
+            vkt.DataItem("Wind Speed", ultimate_wind["V_ms"], suffix="m/s"),
+            vkt.DataItem("Velocity Pressure", ultimate_wind["qz_kPa"], suffix="kPa"),
+            vkt.DataItem("Design Pressure", ultimate_wind["p_kPa"], suffix="kPa")
+        )
+        data.add(vkt.DataItem("Ultimate Wind", subgroup=ultimate_group))
+        
+        # Service wind
+        service_group = vkt.DataGroup()
+        for period, values in service_wind.items():
+            period_group = vkt.DataGroup()
+            period_group.add(
+                vkt.DataItem("Wind Speed", values["V_ms"], suffix="m/s"),
+                vkt.DataItem("Velocity Pressure", values["qz_kPa"], suffix="kPa"),
+                vkt.DataItem("Design Pressure", values["p_kPa"], suffix="kPa")
+            )
+            service_group.add(vkt.DataItem(f"{period.upper()} Year Return", subgroup=period_group))
+        data.add(vkt.DataItem("Service Wind", subgroup=service_group))
+        
+        return vkt.DataResult(data)

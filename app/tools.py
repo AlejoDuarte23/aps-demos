@@ -24,3 +24,7 @@ class FootingDesignTool(BaseModel):
 
 class UploadToAccTool(BaseModel):
     upload_to_acc: bool
+    PEDESTAL_WIDTH: float = Field(..., description="Optimal Pedestal Witdth")
+    PEDESTAL_HEIGHT: float = Field(..., description="Optimal Pedestal Height")
+    SLAB_THICK: float = Field(..., description="Optimal Slab Thickness")
+    SLAB_BASE_SIZE: float = Field(..., description="Optimal Slab Base")
